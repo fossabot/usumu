@@ -1,6 +1,8 @@
 package io.usumu.api.subscription.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.usumu.api.subscription.exception.VerificationFailed;
+import springfox.documentation.annotations.ApiIgnore;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -19,6 +21,7 @@ public class Subscription {
     @Nullable
     public final String value;
     public final Status status;
+    @JsonIgnore
     public final byte[] secret;
 
     public Subscription(

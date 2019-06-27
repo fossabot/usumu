@@ -1,5 +1,6 @@
 package io.usumu.api.subscription.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
@@ -10,6 +11,7 @@ import javax.crypto.spec.SecretKeySpec;
 import java.util.Base64;
 
 @ParametersAreNonnullByDefault
+
 public class EncryptedSubscription {
     public final String hash;
     public final String encryptedData;

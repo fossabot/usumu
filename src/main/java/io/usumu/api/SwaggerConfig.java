@@ -9,6 +9,7 @@ import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.service.ApiInfo;
+import springfox.documentation.service.Tag;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
@@ -27,6 +28,25 @@ public class SwaggerConfig {
                 .build()
                 .apiInfo(metadata())
                 .forCodeGeneration(true)
+                .tags(
+                        new Tag(
+                                "Subscriptions",
+                                "Create, verify, list, retreive or delete subscriptions."
+                        ),
+                        new Tag(
+                                "Logs",
+                                "Retreive transaction logs for a certain subscriber (email, phone)."
+                        ),
+                        new Tag(
+                                "Newsletter",
+                                "Manage and send out newsletters."
+                        ),
+                        new Tag(
+                                "Metadata",
+                                "Store metadata for subscribers."
+                        )
+                )
+                .useDefaultResponseMessages(false)
                 ;
     }
 
