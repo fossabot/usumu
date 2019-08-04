@@ -13,7 +13,7 @@ docker run usumu/usumu
 
 However, to make it useful, you will need to configure it.
 
-**Warning!** NEVER open Usumu to the Internet! It does not contain ANY authentication!
+> **Warning!** NEVER open Usumu to the Internet! It does not contain ANY authentication!
 
 ## Configuration
 
