@@ -14,7 +14,7 @@ import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
-@PropertySource("classpath:io/usumu/api/swagger.properties")
+@PropertySource("classpath:swagger.properties")
 @Configuration
 @EnableSwagger2
 @ComponentScan("io.usumu.api.subscription.controller")

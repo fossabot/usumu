@@ -1,0 +1,39 @@
+{
+  "properties": [
+    {
+      "name": "USUMU_SECRET",
+      "type": "java.lang.String",
+      "description": "Global secret for encrypting data stored on object storage backends."
+    },
+    {
+      "name": "USUMU_INIT_VECTOR",
+      "type": "java.lang.String",
+      "description": "Initialization vector for encryption."
+    },
+    {
+      "name": "USUMU_S3_ACCESS_KEY_ID",
+      "type": "java.lang.String",
+      "description": "The access key for the S3 backend."
+    },
+    {
+      "name": "USUMU_S3_SECRET_ACCESS_KEY",
+      "type": "java.lang.String",
+      "description": "The secret access key for the S3 backend."
+    },
+    {
+      "name": "USUMU_S3_REGION",
+      "type": "java.lang.String",
+      "description": "The region for the S3 backend."
+    },
+    {
+      "name": "USUMU_S3_BUCKET",
+      "type": "java.lang.String",
+      "description": "The name of the S3 bucket to store data in."
+    },
+    {
+      "name": "USUMU_S3_BUCKET_HOST",
+      "type": "java.lang.String",
+      "description": "The bucket host string to use for accessing S3 buckets. Must contain %s for the region placeholder."
+    }
+  ]
+}

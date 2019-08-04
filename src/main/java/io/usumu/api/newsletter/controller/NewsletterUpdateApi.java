@@ -3,12 +3,9 @@ package io.usumu.api.newsletter.controller;
 import io.swagger.annotations.*;
 import io.usumu.api.common.entity.ApiError;
 import io.usumu.api.newsletter.entity.Newsletter;
+import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Nullable;
-import javax.annotation.ParametersAreNonnullByDefault;
-
-@ParametersAreNonnullByDefault
 @RestController
 @Api(
         tags = "Newsletter"

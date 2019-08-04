@@ -4,10 +4,8 @@ import io.swagger.annotations.*;
 import io.usumu.api.common.entity.ApiError;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Map;
 
-@ParametersAreNonnullByDefault
 @RestController
 @Api(
         tags = "Metadata"

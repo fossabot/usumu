@@ -2,20 +2,21 @@ package io.usumu.api.log.controller;
 
 import io.swagger.annotations.*;
 import io.usumu.api.log.entity.SubscriptionLogEntry;
-import io.usumu.api.subscription.controller.SubscriptionListAPI;
+import io.usumu.api.log.resource.SubscriptionLogEntryResource;
+import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.List;
 
-@ParametersAreNonnullByDefault
 @RestController
 @Api(
         tags = "Logs"
 )
+@ExposesResourceFor(SubscriptionLogEntry.class)
+@RequestMapping("/subscriptions/{value}/logs")
 public class LogListApi {
     @ApiOperation(
             nickname = "listLogs",
@@ -30,7 +31,6 @@ public class LogListApi {
             }
     )
     @RequestMapping(
-            value = "/subscriptions/{value}/logs",
             method = RequestMethod.GET
     )
     public SubscriptionLogListResponse list(
@@ -45,9 +45,9 @@ public class LogListApi {
     }
 
     public static class SubscriptionLogListResponse {
-        public final List<SubscriptionLogEntry> entries;
+        public final List<SubscriptionLogEntryResource> entries;
 
-        public SubscriptionLogListResponse(List<SubscriptionLogEntry> entries) {
+        public SubscriptionLogListResponse(List<SubscriptionLogEntryResource> entries) {
             this.entries = entries;
         }
     }

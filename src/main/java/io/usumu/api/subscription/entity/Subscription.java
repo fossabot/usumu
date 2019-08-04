@@ -1,11 +1,11 @@
 package io.usumu.api.subscription.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import io.usumu.api.crypto.GlobalSecret;
 import io.usumu.api.subscription.exception.VerificationFailed;
-import springfox.documentation.annotations.ApiIgnore;
+import org.springframework.lang.Nullable;
 
-import javax.annotation.Nullable;
-import javax.annotation.ParametersAreNonnullByDefault;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
@@ -14,34 +14,38 @@ import java.security.InvalidParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 
-@ParametersAreNonnullByDefault
 public class Subscription {
     public final String id;
     public final Type type;
     @Nullable
     public final String value;
     public final Status status;
-    @JsonIgnore
     public final byte[] secret;
 
     public Subscription(
             Type type,
             String value,
-            byte[] globalSecret
+            GlobalSecret globalSecret
     ) {
-        this.id = computeHash(value, globalSecret);
+        this.id = computeHash(value, globalSecret.secret);
         this.type = type;
         this.value = value;
         this.status = Status.UNCONFIRMED;
         this.secret = createSecret();
     }
 
-    Subscription(
+    @JsonCreator
+    public Subscription(
+        @JsonProperty("id")
             String id,
+            @JsonProperty("type")
             Type type,
             @Nullable
-                    String value,
+            @JsonProperty("value")
+            String value,
+            @JsonProperty("status")
             Status status,
+            @JsonProperty("secret")
             byte[] secret
     ) {
         this.id = id;
@@ -79,8 +83,8 @@ public class Subscription {
         );
     }
 
-    public static String getIdFromValue(String value, byte[] globalSecret) {
-        return computeHash(value, globalSecret);
+    public static String getIdFromValue(String value, GlobalSecret globalSecret) {
+        return computeHash(value, globalSecret.secret);
     }
 
     private static byte[] createSecret() {
@@ -104,6 +108,16 @@ public class Subscription {
         } catch (NoSuchAlgorithmException | InvalidKeyException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public Subscription withSubscribeInitiated(String value, GlobalSecret globalSecret) {
+        return new Subscription(
+            id,
+            type,
+            value,
+            Status.UNCONFIRMED,
+            globalSecret.secret
+        );
     }
 
     private static String bytesToHex(byte[] bytes) {
