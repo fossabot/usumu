@@ -5,10 +5,10 @@ import com.amazonaws.services.s3.model.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.usumu.api.common.entity.PaginatedList;
 import io.usumu.api.crypto.GlobalSecret;
+import io.usumu.api.crypto.HashGenerator;
 import io.usumu.api.s3.S3Configuration;
 import io.usumu.api.s3.S3Factory;
 import io.usumu.api.subscription.entity.EncryptedSubscription;
-import io.usumu.api.subscription.entity.Subscription;
 import io.usumu.api.subscription.exception.SubscriptionNotFound;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,18 +24,21 @@ public class S3Storage implements SubscriptionStorageUpsert, SubscriptionStorage
     private final S3Configuration s3Configuration;
     private final ObjectMapper objectMapper;
     private final GlobalSecret globalSecret;
+    private final HashGenerator hashGenerator;
 
     @Autowired
     public S3Storage(
         S3Factory s3Factory,
         S3Configuration s3Configuration,
         ObjectMapper objectMapper,
-        GlobalSecret globalSecret
+        GlobalSecret globalSecret,
+        HashGenerator hashGenerator
     ) {
         this.s3Factory = s3Factory;
         this.s3Configuration = s3Configuration;
         this.objectMapper = objectMapper;
         this.globalSecret = globalSecret;
+        this.hashGenerator = hashGenerator;
     }
 
     @Override
@@ -52,7 +55,7 @@ public class S3Storage implements SubscriptionStorageUpsert, SubscriptionStorage
             try {
                 object = s3Factory
                     .get()
-                    .getObject(s3Configuration.bucketName, "s/" + Subscription.getIdFromValue(hash, globalSecret));
+                    .getObject(s3Configuration.bucketName, "s/" + hashGenerator.generateHash(hash));
             } catch (AmazonS3Exception e2) {
                 if (!e2.getErrorCode().equalsIgnoreCase("NoSuchKey")) {
                     throw e2;

@@ -1,11 +1,13 @@
 package io.usumu.api.subscription.controller;
 
 import io.swagger.annotations.*;
-import io.usumu.api.crypto.EntityCrypto;
 import io.usumu.api.common.entity.ApiError;
 import io.usumu.api.common.entity.PaginatedList;
-import io.usumu.api.common.exception.ApiException;
+import io.usumu.api.common.validation.*;
+import io.usumu.api.crypto.EntityCrypto;
 import io.usumu.api.crypto.GlobalSecret;
+import io.usumu.api.crypto.HashGenerator;
+import io.usumu.api.crypto.SecretGenerator;
 import io.usumu.api.subscription.entity.EncryptedSubscription;
 import io.usumu.api.subscription.entity.Subscription;
 import io.usumu.api.subscription.exception.DecryptionFailed;
@@ -19,12 +21,12 @@ import io.usumu.api.subscription.storage.SubscriptionStorageUpsert;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.EntityLinks;
 import org.springframework.hateoas.ExposesResourceFor;
-import org.springframework.http.HttpStatus;
 import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.InvalidParameterException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -40,6 +42,8 @@ public class SubscriptionApi {
     private final EntityCrypto entityCrypto;
     private final EntityLinks entityLinks;
     private final GlobalSecret globalSecret;
+    private final SecretGenerator secretGenerator;
+    private final HashGenerator hashGenerator;
 
     @Autowired
     public SubscriptionApi(
@@ -48,7 +52,9 @@ public class SubscriptionApi {
         SubscriptionStorageUpsert subscriptionStorageUpsert,
         EntityCrypto entityCrypto,
         EntityLinks entityLinks,
-        GlobalSecret globalSecret
+        GlobalSecret globalSecret,
+        SecretGenerator secretGenerator,
+        HashGenerator hashGenerator
     ) {
         this.subscriptionStorageList = subscriptionStorageList;
         this.subscriptionStorageGet = subscriptionStorageGet;
@@ -56,6 +62,8 @@ public class SubscriptionApi {
         this.entityCrypto = entityCrypto;
         this.entityLinks = entityLinks;
         this.globalSecret = globalSecret;
+        this.secretGenerator = secretGenerator;
+        this.hashGenerator = hashGenerator;
     }
 
     @ApiOperation(
@@ -71,7 +79,7 @@ public class SubscriptionApi {
     @ApiResponses(
             value = {
                     @ApiResponse(code = 200, message = "Created the subscription", response = SubscriptionResource.class),
-                    @ApiResponse(code = 400, message = "When the given value is invalid for the given type", response = InvalidParameterException.class),
+                    @ApiResponse(code = 400, message = "When the given value is invalid for the given type", response = InvalidParameters.class),
                     @ApiResponse(code = 409, message = "When the given subscription already exists", response = SubscriptionAlreadyExists.class)
             }
     )
@@ -83,7 +91,7 @@ public class SubscriptionApi {
     public SubscriptionResource create(
         @RequestBody
         SubscriptionCreateRequest request
-    ) {
+    ) throws SubscriptionAlreadyExists, InvalidParameters {
         //todo race condition possible
         Subscription subscription;
         EncryptedSubscription encryptedSubscription;
@@ -111,7 +119,8 @@ public class SubscriptionApi {
             subscription = new Subscription(
                 request.type,
                 request.value,
-                globalSecret
+                hashGenerator,
+                secretGenerator
             );
 
             encryptedSubscription = new EncryptedSubscription(
@@ -225,14 +234,19 @@ public class SubscriptionApi {
         @RequestParam(required = false, defaultValue = "")
         @Nullable
         String continuationToken
-    ) {
-        if (itemCount != null && (itemCount < 1 || itemCount > 100)) {
-            throw new ApiException(
-                HttpStatus.BAD_REQUEST,
-                ApiError.ErrorCode.INVALID_PARAMETERS,
-                "Invalid parameter itemCount. Must be between 1 and 100."
-            );
-        }
+    ) throws InvalidParameters {
+        ValidatorChain validatorChain = new ValidatorChain();
+
+        validatorChain.addValidator("itemCount", new MinimumValidator(1));
+        validatorChain.addValidator("itemCount", new MaximumValidator(100));
+        validatorChain.addValidator("continuationToken", new SingleLineValidator());
+        validatorChain.addValidator("continuationToken", new MaximumLengthValidator(255));
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("itemCount", itemCount);
+        data.put("continuationToken", continuationToken);
+        validatorChain.validate(data);
+
         PaginatedList<EncryptedSubscription> encryptedSubscriptions = subscriptionStorageList
             .list(itemCount == null ? 100 : itemCount, continuationToken);
 

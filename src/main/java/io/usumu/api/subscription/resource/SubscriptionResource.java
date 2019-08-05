@@ -2,6 +2,7 @@ package io.usumu.api.subscription.resource;
 
 import io.swagger.annotations.ApiModel;
 import io.usumu.api.common.resource.LinkedResource;
+import io.usumu.api.log.entity.SubscriptionLogEntry;
 import io.usumu.api.subscription.entity.Subscription;
 import org.springframework.hateoas.EntityLinks;
 import org.springframework.hateoas.Link;
@@ -24,7 +25,8 @@ public class SubscriptionResource extends LinkedResource<SubscriptionResource.Su
             TYPE,
             new SubscriptionResourceLinks(
                 entityLinks.linkFor(Subscription.class).withRel("up").withTitle("List of subscriptions"),
-                entityLinks.linkFor(Subscription.class).slash(subscription.id).withSelfRel().withTitle("This subscription")
+                entityLinks.linkFor(Subscription.class).slash(subscription.id).withSelfRel().withTitle("This subscription"),
+                entityLinks.linkFor(SubscriptionLogEntry.class, subscription.id).withSelfRel().withTitle("The logs for this subscription")
             )
         );
         id = subscription.id;
@@ -37,13 +39,16 @@ public class SubscriptionResource extends LinkedResource<SubscriptionResource.Su
     final static class SubscriptionResourceLinks {
         public final Link up;
         public final Link self;
+        private final Link logs;
 
         SubscriptionResourceLinks(
             Link up,
-            Link self
+            Link self,
+            Link logs
         ) {
             this.up = up;
             this.self = self;
+            this.logs = logs;
         }
     }
 }

@@ -2,36 +2,74 @@ package io.usumu.api.subscription.entity;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.usumu.api.common.validation.*;
 import io.usumu.api.crypto.GlobalSecret;
+import io.usumu.api.crypto.HashGenerator;
+import io.usumu.api.crypto.SecretGenerator;
 import io.usumu.api.subscription.exception.VerificationFailed;
 import org.springframework.lang.Nullable;
 
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
-import java.nio.charset.StandardCharsets;
-import java.security.InvalidKeyException;
 import java.security.InvalidParameterException;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Subscription {
+    /**
+     * Public ID of this subscription.
+     */
     public final String id;
+    /**
+     * The type (EMAIL or SMS) of the subscriber
+     */
     public final Type type;
+    /**
+     * The e-mail address or phone number of the subscriber.
+     */
     @Nullable
     public final String value;
+    /**
+     * Subscription status.
+     */
     public final Status status;
+    /**
+     * Secret used for generating verification codes.
+     */
     public final byte[] secret;
 
     public Subscription(
             Type type,
             String value,
-            GlobalSecret globalSecret
-    ) {
-        this.id = computeHash(value, globalSecret.secret);
+            HashGenerator hashGenerator,
+            SecretGenerator secretGenerator
+    ) throws InvalidParameters {
+        ValidatorChain validatorChain = new ValidatorChain();
+
+        validatorChain.addValidator("type", new RequiredValidator());
+        validatorChain.addValidator("value", new RequiredValidator());
+        switch(type) {
+            case EMAIL:
+                validatorChain.addValidator("value", new FormalEmailValidator());
+                break;
+            case SMS:
+                validatorChain.addValidator("value", new PhoneNumberValidator());
+                break;
+            default:
+                if (type != null) {
+                    throw new RuntimeException("Unsupported type: " + type);
+                }
+        }
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("type", type);
+        data.put("value", value);
+
+        validatorChain.validate(data);
+
+        this.id = hashGenerator.generateHash(value);
         this.type = type;
         this.value = value;
         this.status = Status.UNCONFIRMED;
-        this.secret = createSecret();
+        this.secret = secretGenerator.get();
     }
 
     @JsonCreator
@@ -55,19 +93,19 @@ public class Subscription {
         this.secret = secret;
     }
 
-    public String getVerificationCode() {
-        return computeHash("confirmation", secret);
+    public String getVerificationCode(HashGenerator hashGenerator) {
+        return hashGenerator.generateHash("confirmation", secret);
     }
 
-    public Subscription verify(String verificationCode) throws VerificationFailed {
-        if (verificationCode.equals(computeHash("confirmation", secret))) {
+    public Subscription verify(HashGenerator hashGenerator, SecretGenerator secretGenerator, String verificationCode) throws VerificationFailed {
+        if (verificationCode.equals(hashGenerator.generateHash("confirmation", secret))) {
             //Rotate the secret
             return new Subscription(
                     id,
                     type,
                     value,
                     Status.CONFIRMED,
-                    createSecret()
+                    secretGenerator.get()
             );
         }
         throw new VerificationFailed();
@@ -83,33 +121,6 @@ public class Subscription {
         );
     }
 
-    public static String getIdFromValue(String value, GlobalSecret globalSecret) {
-        return computeHash(value, globalSecret.secret);
-    }
-
-    private static byte[] createSecret() {
-        byte[] secret = new byte[32];
-        new SecureRandom().nextBytes(secret);
-        return secret;
-    }
-
-    private static String computeHash(String data, byte[] secret){
-        Mac sha512_HMAC;
-        String result;
-
-        try{
-            final String HMAC_SHA512 = "HmacSHA512";
-            sha512_HMAC = Mac.getInstance(HMAC_SHA512);
-            SecretKeySpec keySpec = new SecretKeySpec(secret, HMAC_SHA512);
-            sha512_HMAC.init(keySpec);
-            byte [] mac_data = sha512_HMAC.doFinal(data.getBytes(StandardCharsets.UTF_8));
-            result = bytesToHex(mac_data);
-            return result;
-        } catch (NoSuchAlgorithmException | InvalidKeyException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     public Subscription withSubscribeInitiated(String value, GlobalSecret globalSecret) {
         return new Subscription(
             id,
@@ -118,17 +129,6 @@ public class Subscription {
             Status.UNCONFIRMED,
             globalSecret.secret
         );
-    }
-
-    private static String bytesToHex(byte[] bytes) {
-        final  char[] hexArray = "0123456789ABCDEF".toCharArray();
-        char[] hexChars = new char[bytes.length * 2];
-        for ( int j = 0; j < bytes.length; j++ ) {
-            int v = bytes[j] & 0xFF;
-            hexChars[j * 2] = hexArray[v >>> 4];
-            hexChars[j * 2 + 1] = hexArray[v & 0x0F];
-        }
-        return new String(hexChars);
     }
 
     public enum Type {

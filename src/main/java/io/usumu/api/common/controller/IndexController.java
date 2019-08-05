@@ -1,5 +1,6 @@
 package io.usumu.api.common.controller;
 
+import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.EntityLinks;
 import org.springframework.hateoas.ExposesResourceFor;
@@ -11,6 +12,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(
     value = "/",
     produces = "application/json"
+)
+@Api(
+    tags = "Documentation"
 )
 @ExposesResourceFor(IndexResponse.class)
 public class IndexController {
