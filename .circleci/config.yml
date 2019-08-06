@@ -74,21 +74,21 @@ workflows:
   build-and-deploy:
     jobs:
       - build-branch:
-          context: usumu
+          context: build
           filters:
             branches:
               ignore: gh-pages
             tags:
               ignore: /.*/
       - build-tag:
-          context: usumu
+          context: build
           filters:
             branches:
               ignore: /.*/
             tags:
               ignore: /.*-SNAPSHOT/
       - deploy-tag:
-          context: usumu
+          context: build
           requires:
             - build-tag
           filters:
