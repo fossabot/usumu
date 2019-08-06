@@ -1,7 +1,6 @@
 package io.usumu.api.newsletter.controller;
 
 import io.swagger.annotations.*;
-import io.usumu.api.common.entity.ApiError;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -22,7 +21,6 @@ public class NewsletterPreviewApi {
     @ApiResponses(
             value = {
                     @ApiResponse(code = 200, message = "The rendered newsletter.", response = NewsletterPreviewResponse.class),
-                    @ApiResponse(code = 404, message = "The newsletter was not found.", response = ApiError.class)
             }
     )
     @RequestMapping(
@@ -47,9 +45,13 @@ public class NewsletterPreviewApi {
     }
 
     public static class NewsletterPreviewResponse {
+        @SuppressWarnings({"WeakerAccess", "unused"})
         public final String subject;
+        @SuppressWarnings({"WeakerAccess", "unused"})
         public final String text;
+        @SuppressWarnings({"WeakerAccess", "unused"})
         public final String html;
+        @SuppressWarnings({"WeakerAccess", "unused"})
         public final String sms;
 
         public NewsletterPreviewResponse(String subject, String text, String html, String sms) {

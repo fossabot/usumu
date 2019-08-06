@@ -1,7 +1,6 @@
 package io.usumu.api.newsletter.controller;
 
 import io.swagger.annotations.*;
-import io.usumu.api.common.entity.ApiError;
 import io.usumu.api.newsletter.entity.Newsletter;
 import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.*;
@@ -21,7 +20,6 @@ public class NewsletterUpdateApi {
     @ApiResponses(
             value = {
                     @ApiResponse(code = 200, message = "A newsletter successfully updated.", response = NewsletterCreateResponse.class),
-                    @ApiResponse(code = 404, message = "The newsletter was not found.", response = ApiError.class)
             }
     )
     @RequestMapping(
@@ -37,54 +35,47 @@ public class NewsletterUpdateApi {
                     String id,
 
             @ApiParam(
-                    value = "Subject template for the e-mail",
-                    required = false
+                    value = "Subject template for the e-mail"
             )
             @RequestParam
             @Nullable
                     String subject,
 
             @ApiParam(
-                    value = "Template for the text part of the e-mail",
-                    required = false
+                    value = "Template for the text part of the e-mail"
             )
             @RequestParam
             @Nullable
                     String textTemplate,
 
             @ApiParam(
-                    value = "Template for the HTML part of the e-mail",
-                    required = false
+                    value = "Template for the HTML part of the e-mail"
             )
             @RequestParam
             @Nullable
                     String htmlTemplate,
 
             @ApiParam(
-                    value = "Template for SMS",
-                    required = false
+                    value = "Template for SMS"
             )
             @RequestParam
             @Nullable
                     String smsTemplate,
 
             @ApiParam(
-                    value = "Only send out newsletter to subscribers who have this metadata key. Note that this can only be changed while the newsletter is in the NEW status.",
-                    required = false
+                    value = "Only send out newsletter to subscribers who have this metadata key. Note that this can only be changed while the newsletter is in the NEW status."
             )
             @RequestParam
                     String filterKey,
 
             @ApiParam(
-                    value = "Only send out newsletter to subscribers who have this metadata value for the key specified in filterKey. Note that this can only be changed while the newsletter is in the NEW status.",
-                    required = false
+                    value = "Only send out newsletter to subscribers who have this metadata value for the key specified in filterKey. Note that this can only be changed while the newsletter is in the NEW status."
             )
             @RequestParam
                     String filterValue,
 
             @ApiParam(
-                    value = "Set to true to start the sending process. Set to false to pause a sending. While sending the templates cannot be updated.",
-                    required = false
+                    value = "Set to true to start the sending process. Set to false to pause a sending. While sending the templates cannot be updated."
             )
             @RequestParam
             @Nullable
@@ -94,6 +85,7 @@ public class NewsletterUpdateApi {
     }
 
     public static class NewsletterCreateResponse {
+        @SuppressWarnings("WeakerAccess")
         public final Newsletter newsletter;
 
         public NewsletterCreateResponse(Newsletter newsletter) {

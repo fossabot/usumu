@@ -1,7 +1,7 @@
 package io.usumu.api.metadata.controller;
 
 import io.swagger.annotations.*;
-import io.usumu.api.common.entity.ApiError;
+import io.usumu.api.subscription.exception.SubscriptionNotFound;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -13,7 +13,7 @@ import java.util.Map;
 public class MetadataUpdateApi {
     @ApiResponses({
             @ApiResponse(code = 200, message = "The metadata was successfully updated.", response = MetadataUpdateResponse.class),
-            @ApiResponse(code = 404, message = "The subscription was not found with the details in question.", response = ApiError.class)
+            @ApiResponse(code = 404, message = "The subscription was not found with the details in question.", response = SubscriptionNotFound.class)
     })
     @ApiOperation(
             nickname = "updateMetadata",
@@ -41,7 +41,9 @@ public class MetadataUpdateApi {
     }
 
     public static class MetadataUpdateResponse {
+        @SuppressWarnings({"WeakerAccess", "unused"})
         public final String subscriptionId;
+        @SuppressWarnings({"WeakerAccess", "unused"})
         public final Map<String, String> metadata;
 
         public MetadataUpdateResponse(String subscriptionId, Map<String, String> metadata) {

@@ -1,8 +1,11 @@
 package io.usumu.api.subscription.exception;
 
+import io.usumu.api.common.entity.ErrorCode;
+import io.usumu.api.common.exception.ApiException;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ResponseStatus;
 
-@ResponseStatus(code = HttpStatus.BAD_REQUEST)
-public class VerificationFailed extends Exception {
+public class VerificationFailed extends ApiException {
+    public VerificationFailed() {
+        super(HttpStatus.BAD_REQUEST, ErrorCode.INVALID_VERIFICATION_CODE, "Invalid or expired verification code.");
+    }
 }

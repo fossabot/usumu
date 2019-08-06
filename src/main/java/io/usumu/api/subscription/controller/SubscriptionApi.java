@@ -1,7 +1,6 @@
 package io.usumu.api.subscription.controller;
 
 import io.swagger.annotations.*;
-import io.usumu.api.common.entity.ApiError;
 import io.usumu.api.common.entity.PaginatedList;
 import io.usumu.api.common.validation.*;
 import io.usumu.api.crypto.EntityCrypto;
@@ -10,10 +9,7 @@ import io.usumu.api.crypto.HashGenerator;
 import io.usumu.api.crypto.SecretGenerator;
 import io.usumu.api.subscription.entity.EncryptedSubscription;
 import io.usumu.api.subscription.entity.Subscription;
-import io.usumu.api.subscription.exception.DecryptionFailed;
-import io.usumu.api.subscription.exception.SubscriptionAlreadyExists;
-import io.usumu.api.subscription.exception.SubscriptionNotFound;
-import io.usumu.api.subscription.exception.VerificationFailed;
+import io.usumu.api.subscription.exception.*;
 import io.usumu.api.subscription.resource.SubscriptionResource;
 import io.usumu.api.subscription.storage.SubscriptionStorageGet;
 import io.usumu.api.subscription.storage.SubscriptionStorageList;
@@ -78,9 +74,21 @@ public class SubscriptionApi {
     )
     @ApiResponses(
             value = {
-                    @ApiResponse(code = 200, message = "Created the subscription", response = SubscriptionResource.class),
-                    @ApiResponse(code = 400, message = "When the given value is invalid for the given type", response = InvalidParameters.class),
-                    @ApiResponse(code = 409, message = "When the given subscription already exists", response = SubscriptionAlreadyExists.class)
+                    @ApiResponse(
+                        code = 200,
+                        message = "Created the subscription",
+                        response = SubscriptionResource.class
+                    ),
+                    @ApiResponse(
+                        code = 400,
+                        message = "When the given value is invalid for the given type",
+                        response = InvalidParameters.class
+                    ),
+                    @ApiResponse(
+                        code = 409,
+                        message = "When the given subscription already exists",
+                        response = SubscriptionAlreadyExists.class
+                    )
             }
     )
     @RequestMapping(
@@ -135,38 +143,9 @@ public class SubscriptionApi {
 
         return new SubscriptionResource(
             subscription,
+            hashGenerator,
             entityLinks
         );
-    }
-
-    @ApiOperation(
-        nickname = "deleteSubscription",
-        value = "Delete a subscription",
-        notes = "Delete a subscription by providing the subscription type (EMAIL or SMS)." +
-            "The value in this case is either the phone number in international format, or the e-mail address.",
-        consumes = "application/json",
-        produces = "application/json"
-    )
-    @ApiResponses(
-        value = {
-            @ApiResponse(code = 200, message = "Successfully deleted the subscription. The subscription logs are still preserved for accountability.", response = SubscriptionResource.class),
-            @ApiResponse(code = 404, message = "The subscription did not exist.", response = ApiError.class)
-        }
-    )
-    @RequestMapping(
-        value = "/{value}",
-        method = RequestMethod.DELETE,
-        consumes = "application/json"
-    )
-    public SubscriptionResource delete(
-        @ApiParam(
-            value = "Subscription ID, or subscriber contact info (EMAIL or PHONE in international format)",
-            required = true
-        )
-        @PathVariable
-            String value
-    ) throws SubscriptionNotFound {
-        return null;
     }
 
     @ApiOperation(
@@ -180,7 +159,7 @@ public class SubscriptionApi {
     @ApiResponses(
         value = {
             @ApiResponse(code = 200, message = "Returns the subscription based on the e-mail address or phone number.", response = SubscriptionResource.class),
-            @ApiResponse(code = 404, message = "The subscription was not found with the details in question.", response = ApiError.class)
+            @ApiResponse(code = 404, message = "The subscription was not found with the details in question.", response = SubscriptionNotFound.class)
         }
     )
     @RequestMapping(
@@ -200,7 +179,7 @@ public class SubscriptionApi {
             Subscription.class
         );
 
-        return new SubscriptionResource(subscription, entityLinks);
+        return new SubscriptionResource(subscription, hashGenerator, entityLinks);
     }
 
     @ApiOperation(
@@ -220,16 +199,14 @@ public class SubscriptionApi {
     )
     public SubscriptionListResponse list(
         @ApiParam(
-            value = "The number of items to return",
-            required = false
+            value = "The number of items to return"
         )
         @RequestParam(required = false)
         @Nullable
         Integer itemCount,
 
         @ApiParam(
-            value = "Token to continue a listing",
-            required = false
+            value = "Token to continue a listing"
         )
         @RequestParam(required = false, defaultValue = "")
         @Nullable
@@ -265,14 +242,15 @@ public class SubscriptionApi {
         return new SubscriptionListResponse(
             subscriptions,
             encryptedSubscriptions.continuationToken,
+            hashGenerator,
             entityLinks
         );
     }
 
     @ApiResponses({
         @ApiResponse(code = 200, message = "Verification successful.", response = SubscriptionVerifyResponse.class),
-        @ApiResponse(code = 400, message = "The verification code submitted is invalid, verification failed.", response = ApiError.class),
-        @ApiResponse(code = 404, message = "The subscription with the e-mail or phone number does not exist.", response = ApiError.class),
+        @ApiResponse(code = 400, message = "The verification code submitted is invalid, verification failed.", response = VerificationFailed.class),
+        @ApiResponse(code = 404, message = "The subscription with the e-mail or phone number does not exist.", response = SubscriptionNotFound.class),
     })
     @ApiOperation(
         nickname = "verifySubscription",
@@ -293,14 +271,64 @@ public class SubscriptionApi {
         )
         @PathVariable
         String value,
+        @RequestBody
+        SubscriptionVerifyRequest request
+    ) throws SubscriptionNotFound, VerificationFailed {
+        EncryptedSubscription encryptedSubscription = subscriptionStorageGet.get(value);
+        Subscription subscription = entityCrypto.decrypt(encryptedSubscription.encryptedData, Subscription.class);
+        subscription = subscription.verify(
+            hashGenerator,
+            secretGenerator,
+            request.verificationCode
+        );
+        subscriptionStorageUpsert.store(new EncryptedSubscription(subscription, entityCrypto));
+
+        return new SubscriptionResource(
+            subscription,
+            hashGenerator,
+            entityLinks
+        );
+    }
+
+    @ApiOperation(
+        nickname = "deleteSubscription",
+        value = "Delete a subscription",
+        notes = "Delete a subscription by providing the subscription type (EMAIL or SMS)." +
+            "The value in this case is either the phone number in international format, or the e-mail address.",
+        consumes = "application/json",
+        produces = "application/json"
+    )
+    @ApiResponses({
+        @ApiResponse(code = 200, message = "Deletion successful.", response = SubscriptionResource.class),
+        @ApiResponse(code = 404, message = "The subscription with the e-mail or phone number does not exist.", response = SubscriptionNotFound.class),
+        @ApiResponse(code = 410, message = "The subscription was already deleted.", response = SubscriptionAlreadyDeleted.class),
+    })
+    @RequestMapping(
+        value = "/{value}",
+        method = RequestMethod.DELETE,
+        consumes = "application/json"
+    )
+    public SubscriptionResource delete(
         @ApiParam(
-            value = "Verification code for the address.",
+            value = "Subscriber ID, or subscriber contact info (EMAIL or PHONE in international format)",
             required = true
         )
-        @RequestParam
-        String verificationCode
-    ) throws SubscriptionNotFound, VerificationFailed {
-        return null;
+        @PathVariable
+        String value
+    ) throws SubscriptionNotFound, SubscriptionAlreadyDeleted {
+        EncryptedSubscription encryptedSubscription = subscriptionStorageGet.get(value);
+        Subscription subscription = entityCrypto.decrypt(encryptedSubscription.encryptedData, Subscription.class);
+        if (subscription.status.equals(Subscription.Status.UNSUBSCRIBED)) {
+            throw new SubscriptionAlreadyDeleted();
+        }
+        subscription = subscription.withUnsubscribed();
+        subscriptionStorageUpsert.store(new EncryptedSubscription(subscription, entityCrypto));
+
+        return new SubscriptionResource(
+            subscription,
+            hashGenerator,
+            entityLinks
+        );
     }
 
     public static class SubscriptionVerifyResponse {
@@ -310,5 +338,4 @@ public class SubscriptionApi {
             this.subscription = subscription;
         }
     }
-
 }

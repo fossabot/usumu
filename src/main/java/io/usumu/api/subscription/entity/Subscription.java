@@ -17,23 +17,28 @@ public class Subscription {
     /**
      * Public ID of this subscription.
      */
+    @SuppressWarnings("WeakerAccess")
     public final String id;
     /**
      * The type (EMAIL or SMS) of the subscriber
      */
+    @SuppressWarnings("WeakerAccess")
     public final Type type;
     /**
      * The e-mail address or phone number of the subscriber.
      */
     @Nullable
+    @SuppressWarnings("WeakerAccess")
     public final String value;
     /**
      * Subscription status.
      */
+    @SuppressWarnings("WeakerAccess")
     public final Status status;
     /**
      * Secret used for generating verification codes.
      */
+    @SuppressWarnings("WeakerAccess")
     public final byte[] secret;
 
     public Subscription(
@@ -128,6 +133,16 @@ public class Subscription {
             value,
             Status.UNCONFIRMED,
             globalSecret.secret
+        );
+    }
+
+    public Subscription withUnsubscribed() {
+        return new Subscription(
+            id,
+            type,
+            null,
+            Status.UNSUBSCRIBED,
+            new byte[0]
         );
     }
 

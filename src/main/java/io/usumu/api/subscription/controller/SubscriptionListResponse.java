@@ -4,6 +4,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiParam;
 import io.usumu.api.common.controller.IndexResponse;
 import io.usumu.api.common.resource.LinkedResource;
+import io.usumu.api.crypto.HashGenerator;
 import io.usumu.api.subscription.entity.Subscription;
 import io.usumu.api.subscription.resource.SubscriptionResource;
 import org.springframework.hateoas.EntityLinks;
@@ -15,6 +16,7 @@ import java.net.URLEncoder;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("WeakerAccess")
 @ApiModel("SubscriptionList")
 public class SubscriptionListResponse extends LinkedResource<SubscriptionListResponseLinks> {
     public final static String TYPE = "subscriptionList";
@@ -27,8 +29,7 @@ public class SubscriptionListResponse extends LinkedResource<SubscriptionListRes
 
     @Nullable
     @ApiParam(
-        value = "This token can be used to continue a listing.",
-        required = false
+        value = "This token can be used to continue a listing."
     )
     public final String continuationToken;
 
@@ -45,14 +46,14 @@ public class SubscriptionListResponse extends LinkedResource<SubscriptionListRes
         }
     }
 
-    public SubscriptionListResponse(List<Subscription> subscriptions, @Nullable String continuationToken, EntityLinks entityLinks) {
+    public SubscriptionListResponse(List<Subscription> subscriptions, @Nullable String continuationToken, HashGenerator hashGenerator, EntityLinks entityLinks) {
         super(TYPE, new SubscriptionListResponseLinks(
             entityLinks.linkFor(Subscription.class).withSelfRel(),
             entityLinks.linkFor(IndexResponse.class).withRel("up"),
             getNextLink(entityLinks, continuationToken)
         ));
         this.subscriptions = subscriptions.stream().map(subscription -> new SubscriptionResource(
-            subscription, entityLinks
+            subscription, hashGenerator, entityLinks
         )).collect(Collectors.toList());
         this.continuationToken = continuationToken;
     }
