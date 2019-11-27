@@ -1,18 +1,20 @@
 package io.usumu.api.subscription.resource;
 
 import io.swagger.annotations.ApiModel;
-import io.usumu.api.common.resource.LinkedResource;
 import io.usumu.api.crypto.HashGenerator;
 import io.usumu.api.log.entity.SubscriptionLogEntry;
+import io.usumu.api.log.resource.SubscriptionLogEntryResource;
 import io.usumu.api.subscription.entity.Subscription;
-import org.springframework.hateoas.EntityLinks;
-import org.springframework.hateoas.Link;
 import org.springframework.lang.Nullable;
+import zone.refactor.spring.hateoas.contract.Link;
+import zone.refactor.spring.hateoas.contract.LinkProvider;
+import zone.refactor.spring.hateoas.entity.Entity;
+import zone.refactor.spring.hateoas.entity.LinkedEntity;
 
 @ApiModel(
     "Subscription"
 )
-public class SubscriptionResource extends LinkedResource<SubscriptionResource.SubscriptionResourceLinks> {
+public class SubscriptionResource extends LinkedEntity<SubscriptionResource.SubscriptionResourceLinks> {
     @SuppressWarnings("WeakerAccess")
     public final static String TYPE = "subscription";
 
@@ -29,19 +31,22 @@ public class SubscriptionResource extends LinkedResource<SubscriptionResource.Su
     @SuppressWarnings("WeakerAccess")
     public final Subscription.Status status;
 
-    public SubscriptionResource(Subscription subscription, HashGenerator hashGenerator, EntityLinks entityLinks) {
+    public SubscriptionResource(
+        Subscription subscription,
+        HashGenerator hashGenerator,
+        LinkProvider linkProvider
+    ) {
         this(
             subscription,
             hashGenerator,
-            entityLinks.linkFor(Subscription.class).withRel("up").withTitle("List of subscriptions"),
-            entityLinks.linkFor(Subscription.class).slash(subscription.id).withSelfRel().withTitle("This subscription"),
-            entityLinks.linkFor(SubscriptionLogEntry.class, subscription.id).withSelfRel().withTitle("The logs for this subscription")
+            linkProvider.getResourceListLink(SubscriptionResource.class),
+            linkProvider.getResourceLink(SubscriptionResource.class, subscription.id),
+            linkProvider.getResourceListLink(SubscriptionLogEntryResource.class, subscription.id)
         );
     }
 
     private SubscriptionResource(Subscription subscription, HashGenerator hashGenerator, Link up, Link self, Link logs) {
         super(
-            TYPE,
             new SubscriptionResourceLinks(
                 up,
                 self,
@@ -57,7 +62,7 @@ public class SubscriptionResource extends LinkedResource<SubscriptionResource.Su
 
     @SuppressWarnings("WeakerAccess")
     @ApiModel("SubscriptionLinks")
-    public final static class SubscriptionResourceLinks {
+    public final static class SubscriptionResourceLinks extends Entity {
         @SuppressWarnings({"WeakerAccess", "unused"})
         public final Link up;
         @SuppressWarnings({"WeakerAccess", "unused"})

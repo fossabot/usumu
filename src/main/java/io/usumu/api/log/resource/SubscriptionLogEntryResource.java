@@ -1,16 +1,16 @@
 package io.usumu.api.log.resource;
 
-import io.usumu.api.common.resource.LinkedResource;
+import io.swagger.annotations.ApiModel;
 import io.usumu.api.log.entity.SubscriptionLogEntry;
-import org.springframework.hateoas.EntityLinks;
-import org.springframework.hateoas.Link;
 import org.springframework.lang.Nullable;
+import zone.refactor.spring.hateoas.contract.LinkProvider;
+import zone.refactor.spring.hateoas.entity.LinkedEntity;
+import zone.refactor.spring.hateoas.entity.SelfUpLink;
 
 import java.time.LocalDateTime;
 
-public class SubscriptionLogEntryResource extends LinkedResource<SubscriptionLogEntryResource.SubscriptionLogEntryResourceLinks> {
-    public final static String TYPE = "logEntry";
-
+@ApiModel("SubscriptionLogEntry")
+public class SubscriptionLogEntryResource extends LinkedEntity<SelfUpLink> {
     public final String id;
     public final String subscriptionId;
     public final LocalDateTime time;
@@ -21,11 +21,11 @@ public class SubscriptionLogEntryResource extends LinkedResource<SubscriptionLog
 
     public SubscriptionLogEntryResource(
         SubscriptionLogEntry logEntry,
-        EntityLinks entityLinks
+        LinkProvider linkProvider
     ) {
-        super(TYPE, new SubscriptionLogEntryResourceLinks(
-            entityLinks.linkFor(SubscriptionLogEntry.class, logEntry.subscriptionId).withRel("up").withTitle("All log entries for this subscription"),
-            entityLinks.linkFor(SubscriptionLogEntry.class, logEntry.subscriptionId).slash(logEntry.id).withSelfRel().withTitle("This log entry")
+        super(new SelfUpLink(
+            linkProvider.getResourceLink(SubscriptionLogEntryResource.class, logEntry.id, logEntry.subscriptionId),
+            linkProvider.getResourceListLink(SubscriptionLogEntryResource.class, logEntry.subscriptionId)
         ));
         id = logEntry.id;
         subscriptionId = logEntry.subscriptionId;
@@ -33,18 +33,5 @@ public class SubscriptionLogEntryResource extends LinkedResource<SubscriptionLog
         type = logEntry.type;
         ipAddress = logEntry.ipAddress;
         newsletterId = logEntry.newsletterId;
-    }
-
-    public static class SubscriptionLogEntryResourceLinks {
-        public final Link up;
-        public final Link self;
-
-        public SubscriptionLogEntryResourceLinks(
-            Link up,
-            Link self
-        ) {
-            this.up = up;
-            this.self = self;
-        }
     }
 }
