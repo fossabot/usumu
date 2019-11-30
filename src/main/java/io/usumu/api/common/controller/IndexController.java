@@ -2,11 +2,10 @@ package io.usumu.api.common.controller;
 
 import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.EntityLinks;
-import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import zone.refactor.spring.hateoas.contract.LinkProvider;
 
 @RestController
 @RequestMapping(
@@ -16,13 +15,12 @@ import org.springframework.web.bind.annotation.RestController;
 @Api(
     tags = "Documentation"
 )
-@ExposesResourceFor(IndexResponse.class)
 public class IndexController {
-    private final EntityLinks entityLinks;
+    private final LinkProvider linkProvider;
 
     @Autowired
-    public IndexController(EntityLinks entityLinks) {
-        this.entityLinks = entityLinks;
+    public IndexController(LinkProvider linkProvider) {
+        this.linkProvider = linkProvider;
     }
 
     @RequestMapping(
@@ -30,7 +28,7 @@ public class IndexController {
     )
     public IndexResponse index() {
         return new IndexResponse(
-            entityLinks
+            linkProvider
         );
     }
 

@@ -1,9 +1,7 @@
 package io.usumu.api.log.controller;
 
 import io.swagger.annotations.*;
-import io.usumu.api.log.entity.SubscriptionLogEntry;
 import io.usumu.api.log.resource.SubscriptionLogEntryResource;
-import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -15,7 +13,6 @@ import java.util.List;
 @Api(
         tags = "Logs"
 )
-@ExposesResourceFor(SubscriptionLogEntry.class)
 @RequestMapping("/subscriptions/{value}/logs")
 public class LogListApi {
     @ApiOperation(
