@@ -6,7 +6,7 @@ import org.springframework.http.HttpStatus;
 
 public class SubscriptionAlreadyExists extends ApiException {
     public SubscriptionAlreadyExists() {
-        super(HttpStatus.CONFLICT, ErrorCode.SUBSCRIPTION_ALREADY_EXISTS, "The specified subscription already exists.");
+        super(HttpStatus.CONFLICT, ErrorCode.ALREADY_EXISTS, "The specified subscription already exists.");
     }
 
 }

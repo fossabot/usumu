@@ -6,6 +6,6 @@ import org.springframework.http.HttpStatus;
 
 public class SubscriptionNotFound extends ApiException {
     public SubscriptionNotFound() {
-        super(HttpStatus.NOT_FOUND, ErrorCode.SUBSCRIPTION_NOT_FOUND, "The specified subscription was not found.");
+        super(HttpStatus.NOT_FOUND, ErrorCode.NOT_FOUND, "The specified subscription was not found.");
     }
 }

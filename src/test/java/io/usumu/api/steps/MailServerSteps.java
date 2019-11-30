@@ -1,12 +1,12 @@
 package io.usumu.api.steps;
 
-import io.usumu.api.VariableStorage;
-import io.usumu.api.smtp.MailStorage;
-import io.usumu.api.smtp.Message;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import org.apache.commons.lang3.StringEscapeUtils;
+import io.usumu.api.VariableStorage;
+import io.usumu.api.smtp.MailStorage;
+import io.usumu.api.smtp.Message;
+import org.apache.commons.text.StringEscapeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
 
