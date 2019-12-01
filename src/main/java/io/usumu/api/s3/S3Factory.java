@@ -60,6 +60,11 @@ public class S3Factory implements Supplier<AmazonS3> {
                 String.format(s3Configuration.bucketHost, region),
                 region
             ));
+        } else if (s3Configuration.endpoint != null) {
+            builder = builder.withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(
+                s3Configuration.endpoint,
+                region
+            ));
         } else {
             builder = builder.withRegion(region);
         }

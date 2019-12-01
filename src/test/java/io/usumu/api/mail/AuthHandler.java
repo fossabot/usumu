@@ -1,4 +1,4 @@
-package io.usumu.api.smtp;
+package io.usumu.api.mail;
 
 import org.subethamail.smtp.AuthenticationHandler;
 import org.subethamail.smtp.RejectException;

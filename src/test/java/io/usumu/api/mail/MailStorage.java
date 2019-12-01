@@ -1,4 +1,4 @@
-package io.usumu.api.smtp;
+package io.usumu.api.mail;
 
 import org.springframework.stereotype.Service;
 

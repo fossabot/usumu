@@ -1,4 +1,4 @@
-package io.usumu.api.smtp;
+package io.usumu.api.mail;
 
 import org.subethamail.smtp.TooMuchDataException;
 import org.subethamail.smtp.helper.SimpleMessageListener;

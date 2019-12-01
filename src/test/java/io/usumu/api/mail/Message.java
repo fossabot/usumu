@@ -1,4 +1,4 @@
-package io.usumu.api.smtp;
+package io.usumu.api.mail;
 
 import javax.mail.internet.MimeMessage;
 import java.util.UUID;

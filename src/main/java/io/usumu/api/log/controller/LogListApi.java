@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import zone.refactor.spring.hateoas.annotation.ListingEndpoint;
 
 import java.util.List;
 
@@ -30,6 +31,7 @@ public class LogListApi {
     @RequestMapping(
             method = RequestMethod.GET
     )
+    @ListingEndpoint(SubscriptionLogEntryResource.class)
     public SubscriptionLogListResponse list(
             @ApiParam(
                     value = "Subscription ID, or subscriber contact info (EMAIL or PHONE in international format)",

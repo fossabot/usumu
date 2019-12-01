@@ -9,7 +9,10 @@ public class S3Configuration {
     public final String accessKeyId;
     public final String secretAccessKey;
     public final String region;
+    @Nullable
+    public final String endpoint;
     public final String bucketName;
+    @Nullable
     public final String bucketHost;
 
     public S3Configuration(
@@ -22,6 +25,9 @@ public class S3Configuration {
         @Nullable
         @Value("${USUMU_S3_REGION:#{null}}")
         String region,
+        @Nullable
+        @Value("${USUMU_S3_ENDPOINT:#{null}}")
+        String endpoint,
         @Value("${USUMU_S3_BUCKET}")
         String bucketName,
         @Nullable
@@ -31,6 +37,7 @@ public class S3Configuration {
         this.accessKeyId = accessKeyId;
         this.secretAccessKey = secretAccessKey;
         this.region = region;
+        this.endpoint = endpoint;
         this.bucketName = bucketName;
         this.bucketHost = bucketHost;
     }

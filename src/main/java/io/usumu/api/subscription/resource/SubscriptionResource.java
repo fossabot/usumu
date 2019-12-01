@@ -14,9 +14,6 @@ import zone.refactor.spring.hateoas.entity.LinkedEntity;
 )
 public class SubscriptionResource extends LinkedEntity<SubscriptionResourceLinks> {
     @SuppressWarnings("WeakerAccess")
-    public final static String TYPE = "subscription";
-
-    @SuppressWarnings("WeakerAccess")
     public final String id;
     @SuppressWarnings("WeakerAccess")
     public final Subscription.Type type;

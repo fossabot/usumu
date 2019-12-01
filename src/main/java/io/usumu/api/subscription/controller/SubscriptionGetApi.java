@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import zone.refactor.spring.hateoas.annotation.EntityEndpoint;
 import zone.refactor.spring.hateoas.contract.LinkProvider;
 
 @RestController
@@ -56,6 +57,7 @@ public class SubscriptionGetApi {
         value = "/{value}",
         method = RequestMethod.GET
     )
+    @EntityEndpoint(SubscriptionResource.class)
     public SubscriptionResource get(
         @ApiParam(
             value = "Subscription ID, or subscriber contact info (EMAIL or PHONE in international format)",

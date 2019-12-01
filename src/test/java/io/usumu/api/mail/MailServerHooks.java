@@ -1,4 +1,4 @@
-package io.usumu.api.smtp;
+package io.usumu.api.mail;
 
 import io.cucumber.java.After;
 import io.cucumber.java.Before;

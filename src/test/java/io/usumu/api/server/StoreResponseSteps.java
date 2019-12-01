@@ -1,4 +1,4 @@
-package io.usumu.api.steps;
+package io.usumu.api.server;
 
 import io.cucumber.java.en.Then;
 import io.usumu.api.LastResponseStorage;
@@ -14,6 +14,13 @@ public class StoreResponseSteps {
     ) {
         this.lastResponseStorage = lastResponseStorage;
         this.variableStorage = variableStorage;
+    }
+
+    @Then("^the last call should succeed.$")
+    public void success() {
+        assert lastResponseStorage.lastResponse != null;
+        assert lastResponseStorage.lastResponse.getStatus() >=200;
+        assert lastResponseStorage.lastResponse.getStatus() < 300;
     }
 
     @Then("^I store the response field \"([^\"]*)\" in variable \"([^\"]*)\"$")

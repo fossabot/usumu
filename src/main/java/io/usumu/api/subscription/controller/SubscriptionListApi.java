@@ -8,6 +8,7 @@ import io.usumu.api.crypto.HashGenerator;
 import io.usumu.api.subscription.entity.EncryptedSubscription;
 import io.usumu.api.subscription.entity.Subscription;
 import io.usumu.api.subscription.exception.DecryptionFailed;
+import io.usumu.api.subscription.resource.SubscriptionResource;
 import io.usumu.api.subscription.storage.SubscriptionStorageList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import zone.refactor.spring.hateoas.annotation.ListingEndpoint;
 import zone.refactor.spring.hateoas.contract.LinkProvider;
 
 import java.util.HashMap;
@@ -61,6 +63,7 @@ public class SubscriptionListApi {
     @RequestMapping(
         method = RequestMethod.GET
     )
+    @ListingEndpoint(SubscriptionResource.class)
     public SubscriptionListResponse list(
         @ApiParam(
             value = "The number of items to return"
