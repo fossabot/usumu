@@ -9,7 +9,8 @@ jobs:
   build-branch:
     <<: *defaults
     steps:
-      - checkout
+      - checkout:
+          path: /tmp/project
       - run:
           name: Set Maven version
           command: mvn versions:set -DnewVersion=${CIRCLE_BRANCH}-SNAPSHOT
@@ -27,7 +28,8 @@ jobs:
   build-tag:
     <<: *defaults
     steps:
-      - checkout
+      - checkout:
+          path: /tmp/project
       - run:
           name: Set Maven version
           command: mvn versions:set -DnewVersion=${CIRCLE_TAG}
@@ -68,7 +70,6 @@ jobs:
       - run: rm /release/cli-${CIRCLE_TAG}.jar
       - run: ghr -u janoszen -r usumu -recreate ${CIRCLE_TAG} /release
       - run: rm -rf /tmp/project
-
 workflows:
   version: 2
   build-and-deploy:
