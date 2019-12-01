@@ -1,9 +1,12 @@
 package io.usumu.api.subscription;
 
+import io.cucumber.java.en.Given;
+import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import io.usumu.api.LastResponseStorage;
 import io.usumu.api.subscription.controller.SubscriptionCreateRequest;
 import io.usumu.api.subscription.entity.Subscription;
+import kong.unirest.JsonNode;
 import kong.unirest.Unirest;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -27,6 +30,7 @@ public class SubscriptionSteps {
         this.responseStorage = responseStorage;
     }
 
+    @Given("^I created a subscriber with the type \"([^\"]*)\" and the value \"([^\"]*)\"$")
     @When("^I create a subscriber with the type \"([^\"]*)\" and the value \"([^\"]*)\"$")
     public void createSubscriber(
         String type,
@@ -45,11 +49,10 @@ public class SubscriptionSteps {
             .asJson();
     }
 
-
-    @When("^the subscription for \"(.*)\" should exist(|,|\\.)$")
+    @Given("^I fetched the subscription \"(.*)\"(?:|,|\\.)$")
+    @When("^I fetch the subscription \"(.*)\"(?:|,|\\.)$")
     public void getSubscriber(
-        String value,
-        String status
+        String value
     ) {
         try {
             responseStorage.lastResponse = Unirest
@@ -60,4 +63,24 @@ public class SubscriptionSteps {
             throw new RuntimeException(e);
         }
     }
+
+    @Then("^the last call should return a subscription(?:|,|\\.)$")
+    public void checkSubscriberTypeAndValue() {
+        assert responseStorage.lastResponse != null;
+        assert responseStorage.lastResponse.getBody().getObject().get("@type").equals("Subscription");
+    }
+
+    @Then("^the subscription in the last response should have the type \"(.*)\" and the value \"(.*)\",$")
+    public void dataCheck(String type, String value) {
+        final JsonNode json = responseStorage.lastResponse.getBody();
+        assert json.getObject().get("type").equals(type);
+        assert json.getObject().get("value").equals(value);
+    }
+
+    @Then("^the subscription in the last response should have the status \"(?:[^\"]+)\"(|,|\\.)$")
+    public void statusCheck(String status) {
+        final JsonNode json = responseStorage.lastResponse.getBody();
+        assert json.getObject().get("status").equals("UNCONFIRMED");
+    }
+
 }

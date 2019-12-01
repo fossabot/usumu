@@ -35,11 +35,4 @@ public class StoreResponseSteps {
     public void store(String responseField, String variable) {
         variableStorage.variables.put(variable, lastResponseStorage.lastResponse.getBody().getObject().get(responseField).toString());
     }
-
-    @Then("^the subscription in the last response should have the status \"(?:[^\"]+)\"(|,|\\.)$")
-    public void statusCheck(String status) {
-        final JsonNode json = lastResponseStorage.lastResponse.getBody();
-        assert json.getObject().get("@type").equals("Subscription");
-        assert json.getObject().get("status").equals("UNCONFIRMED");
-    }
 }

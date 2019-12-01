@@ -1,5 +1,6 @@
 package io.usumu.api.subscription.resource;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModel;
 import io.usumu.api.crypto.HashGenerator;
 import io.usumu.api.log.resource.SubscriptionLogEntryResource;
@@ -14,16 +15,21 @@ import zone.refactor.spring.hateoas.entity.LinkedEntity;
 )
 public class SubscriptionResource extends LinkedEntity<SubscriptionResourceLinks> {
     @SuppressWarnings("WeakerAccess")
+    @JsonProperty(value = "id", required = true)
     public final String id;
     @SuppressWarnings("WeakerAccess")
+    @JsonProperty(value = "type", required = true)
     public final Subscription.Type type;
     @SuppressWarnings("WeakerAccess")
     @Nullable
+    @JsonProperty(value = "value", required = false)
     public final String value;
     @SuppressWarnings("WeakerAccess")
     @Nullable
+    @JsonProperty(value = "verificationCode", required = false)
     public final String verificationCode;
     @SuppressWarnings("WeakerAccess")
+    @JsonProperty(value = "status", required = true)
     public final Subscription.Status status;
 
     public SubscriptionResource(
