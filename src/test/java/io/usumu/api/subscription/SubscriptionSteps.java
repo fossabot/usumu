@@ -5,7 +5,9 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import io.usumu.api.LastResponseStorage;
 import io.usumu.api.subscription.controller.SubscriptionCreateRequest;
+import io.usumu.api.subscription.controller.SubscriptionVerifyRequest;
 import io.usumu.api.subscription.entity.Subscription;
+import io.usumu.api.variable.VariableStorage;
 import kong.unirest.JsonNode;
 import kong.unirest.Unirest;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -25,9 +27,11 @@ import java.net.URLEncoder;
 )
 public class SubscriptionSteps {
     private final LastResponseStorage responseStorage;
+    private final VariableStorage variableStorage;
 
-    public SubscriptionSteps(final LastResponseStorage responseStorage) {
+    public SubscriptionSteps(final LastResponseStorage responseStorage, final VariableStorage variableStorage) {
         this.responseStorage = responseStorage;
+        this.variableStorage = variableStorage;
     }
 
     @Given("^I created a subscriber with the type \"([^\"]*)\" and the value \"([^\"]*)\"$")
@@ -56,7 +60,7 @@ public class SubscriptionSteps {
     ) {
         try {
             responseStorage.lastResponse = Unirest
-                .get("http://127.0.0.1:8080/subscriptions/" + URLEncoder.encode(value, "UTF-8"))
+                .get("http://127.0.0.1:8080/subscriptions/" + URLEncoder.encode(variableStorage.resolve(value), "UTF-8"))
                 .accept("application/json")
                 .asJson();
         } catch (UnsupportedEncodingException e) {
@@ -64,23 +68,46 @@ public class SubscriptionSteps {
         }
     }
 
+    @Given("^the last call returned a subscription(?:|,|\\.)$")
+    @When("^the last call returns a subscription(?:|,|\\.)$")
     @Then("^the last call should return a subscription(?:|,|\\.)$")
     public void checkSubscriberTypeAndValue() {
         assert responseStorage.lastResponse != null;
         assert responseStorage.lastResponse.getBody().getObject().get("@type").equals("Subscription");
     }
 
+    @Given("^the subscription in the last response had the type \"(.*)\" and the value \"(.*)\",$")
+    @When("^the subscription in the last response has the type \"(.*)\" and the value \"(.*)\",$")
     @Then("^the subscription in the last response should have the type \"(.*)\" and the value \"(.*)\",$")
     public void dataCheck(String type, String value) {
         final JsonNode json = responseStorage.lastResponse.getBody();
-        assert json.getObject().get("type").equals(type);
-        assert json.getObject().get("value").equals(value);
+        assert json.getObject().get("type").equals(variableStorage.resolve(type));
+        assert json.getObject().get("value").equals(variableStorage.resolve(value));
     }
 
-    @Then("^the subscription in the last response should have the status \"(?:[^\"]+)\"(|,|\\.)$")
+    @Given("^the subscription in the last response had the status \"([^\"]+)\"(?:|,|\\.)$")
+    @When("^the subscription in the last response has the status \"([^\"]+)\"(?:|,|\\.)$")
+    @Then("^the subscription in the last response should have the status \"([^\"]+)\"(?:|,|\\.)$")
     public void statusCheck(String status) {
         final JsonNode json = responseStorage.lastResponse.getBody();
-        assert json.getObject().get("status").equals("UNCONFIRMED");
+        assert json.getObject().get("status").equals(variableStorage.resolve(status));
     }
 
+    @Given("^I confirmed the subscription \"(.*)\" with the code \"(.*)\"(?:|,|\\.)$")
+    @When("^I confirm the subscription \"(.*)\" with the code \"(.*)\"(?:|,|\\.)$")
+    public void confirm(String value, String code) {
+        final SubscriptionVerifyRequest verifyRequest = new SubscriptionVerifyRequest(
+            variableStorage.resolve(code)
+        );
+        try {
+            responseStorage.lastResponse = Unirest
+                .patch("http://localhost:8080/subscriptions/" + URLEncoder.encode(variableStorage.resolve(value), "UTF-8"))
+                .header("Content-Type", "application/json")
+                .accept("application/json")
+                .body(verifyRequest)
+                .asJson();
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

@@ -3,9 +3,7 @@ package io.usumu.api.mail;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import io.usumu.api.VariableStorage;
-import io.usumu.api.mail.MailStorage;
-import io.usumu.api.mail.Message;
+import io.usumu.api.variable.VariableStorage;
 import org.apache.commons.text.StringEscapeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
@@ -39,47 +37,17 @@ public class MailServerSteps {
         this.variableStorage = variableStorage;
     }
 
-    @When("^I empty the mailbox for \"([^\"]*)\"$")
+    @Given("^I emptied the mailbox \"([^\"]*)\"(?:|,|\\.)$")
+    @When("^I empty the mailbox \"([^\"]*)\"(?:|,|\\.)$")
     public void emptyMailbox(String email) {
         mailStorage.empty(email);
     }
 
-    @Given("^I receive an e-mail to \"([^\"]*)\"$")
+    @Given("^I received an e-mail to \"([^\"]*)\"$")
+    @When("^I receive an e-mail to \"([^\"]*)\"$")
     @Then("^I should receive an e-mail to \"([^\"]*)\"$")
     public void shouldReceiveEmail(String email) {
         assertTrue(mailStorage.read(email).size() > 0);
-    }
-
-    @Given("^I see a link in the mailbox \"([^\"]*)\" to \"([^\"]*)\"$")
-    public void seeLink(String email, String patternString) {
-        shouldSeeLinkAndStore(email, patternString, null, null);
-    }
-
-    @Then("^I should see a link in the mailbox \"([^\"]*)\" to \"([^\"]*)\"$")
-    public void shouldSeeLink(String email, String patternString) {
-        shouldSeeLinkAndStore(email, patternString, null, null);
-    }
-
-    @Given("^I see a link in the mailbox \"([^\"]*)\" to \"([^\"]*)\" and capture \"([^\"]*)\" as \"([^\"]*)\"$")
-    public void seeLinkAndStore(String email, String patternString, @Nullable String captureGroup, @Nullable String captureName) {
-        shouldSeeLinkAndStore(email, patternString, captureGroup, captureName);
-    }
-
-    @Then("^I should see a link in the mailbox \"([^\"]*)\" to \"([^\"]*)\" and capture \"([^\"]*)\" as \"([^\"]*)\"$")
-    public void shouldSeeLinkAndStore(String email, String patternString, @Nullable String captureGroup, @Nullable String captureName) {
-        Pattern pattern = Pattern.compile(patternString);
-        Collection<Message> emails = mailStorage.read(email);
-        Optional<Message> message = emails.stream().findAny();
-        if (!message.isPresent()) {
-            fail("The required message was not found.");
-        } else {
-            try {
-                MimeMessage mimeMessage = message.get().message;
-                assertTrue("The required link was not found.", findLink(pattern, mimeMessage, captureGroup, captureName));
-            } catch (MessagingException|IOException e) {
-                fail("Messaging exception: " + e.getMessage());
-            }
-        }
     }
 
     private boolean findLink(Pattern linkPattern, Part message, @Nullable String captureGroup, @Nullable String captureName) throws MessagingException, IOException {
@@ -103,7 +71,7 @@ public class MailServerSteps {
                 Matcher linkMatcher = linkPattern.matcher(match);
                 if (linkMatcher.matches()) {
                     if (captureName != null && captureGroup != null && !captureName.isEmpty() && !captureGroup.isEmpty()) {
-                        variableStorage.variables.put(captureName, linkMatcher.group(captureGroup));
+                        variableStorage.store(captureName, linkMatcher.group(captureGroup));
                     }
 
                     return true;
