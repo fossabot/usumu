@@ -7,6 +7,9 @@ import io.usumu.api.subscription.entity.Subscription;
 import kong.unirest.Unirest;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+
 @SpringBootTest(
     properties = {
         "USUMU_SECRET=niezaichooNoz9gae5Yei4muy3ai2boo",
@@ -40,5 +43,21 @@ public class SubscriptionSteps {
             .accept("application/json")
             .body(request)
             .asJson();
+    }
+
+
+    @When("^the subscription for \"(.*)\" should exist(|,|\\.)$")
+    public void getSubscriber(
+        String value,
+        String status
+    ) {
+        try {
+            responseStorage.lastResponse = Unirest
+                .get("http://127.0.0.1:8080/subscriptions/" + URLEncoder.encode(value, "UTF-8"))
+                .accept("application/json")
+                .asJson();
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
