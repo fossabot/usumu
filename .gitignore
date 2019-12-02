@@ -3,3 +3,4 @@
 target
 *.pyc
 docs/node_modules/
+.flattened-pom.xml

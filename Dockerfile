@@ -19,6 +19,8 @@ FROM openjdk:8-jdk-alpine AS runtime
 VOLUME /tmp
 RUN mkdir /opt/usumu
 COPY --from=builder /usr/src/target/*.jar /opt/usumu
+WORKDIR /opt/usumu
+
 EXPOSE 8080
 
 ENV USUMU_SECRET=""
@@ -29,5 +31,5 @@ ENV USUMU_S3_REGION=""
 ENV USUMU_S3_BUCKET=""
 ENV USUMU_S3_BUCKET_HOST=""
 
-WORKDIR /opt/usumu
 ENTRYPOINT ["/usr/bin/java", "-jar", "/opt/usumu/usumu-1.0-SNAPSHOT.jar"]
+CMD []
