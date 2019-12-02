@@ -24,7 +24,7 @@ jobs:
       - persist_to_workspace:
           root: /tmp/project
           paths:
-            - "*/target/*.jar"
+            - "target/*.jar"
   build-tag:
     <<: *defaults
     steps:
@@ -43,7 +43,7 @@ jobs:
       - persist_to_workspace:
           root: /tmp/project
           paths:
-            - "*/target/*.jar"
+            - "target/*.jar"
   deploy-branch:
     <<: *defaults
     steps:
