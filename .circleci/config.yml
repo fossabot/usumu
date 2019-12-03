@@ -65,6 +65,7 @@ jobs:
       - run: rm /release/cli-${CIRCLE_BRANCH}-SNAPSHOT.jar
       - run: ghr -u janoszen -r usumu -recreate -prerelease ${CIRCLE_BRANCH}-SNAPSHOT /release
   deploy-branch-docker:
+    <<: *defaults
     machine: true
     steps:
     - attach_workspace:
@@ -92,6 +93,7 @@ jobs:
       - run: ghr -u janoszen -r usumu -recreate ${CIRCLE_TAG} /release
       - run: rm -rf /tmp/project
   deploy-tag-docker:
+    <<: *defaults
     machine: true
     steps:
     - attach_workspace:
