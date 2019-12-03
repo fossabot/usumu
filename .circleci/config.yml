@@ -79,7 +79,7 @@ jobs:
     - run:
         command: docker build -t usumu/usumu:SNAPSHOT .
     - run: |
-        echo "$DOCKER_PASS" | docker login --username $DOCKER_USER --password-stdin
+        echo "$DOCKER_PASSWORD" | docker login --username $DOCKER_USER --password-stdin
     - run: docker push usumu/usumu:${CIRCLE_BRANCH}-SNAPSHOT
     - run: docker push usumu/usumu:SNAPSHOT
   deploy-tag-github:
@@ -109,7 +109,7 @@ jobs:
     - run:
         command: docker build -t usumu/usumu:LATEST .
     - run: |
-        echo "$DOCKER_PASS" | docker login --username $DOCKER_USER --password-stdin
+        echo "$DOCKER_PASSWORD" | docker login --username $DOCKER_USER --password-stdin
     - run: docker push usumu/usumu:${CIRCLE_TAG}
     - run: docker push usumu/usumu:LATEST
 workflows:
