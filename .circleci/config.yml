@@ -3,11 +3,11 @@ version: 2
 defaults: &defaults
   working_directory: /tmp/project
   parallelism: 1
-  docker:
-    - image: usumu/build
 jobs:
   build-branch:
     <<: *defaults
+    docker:
+    - image: usumu/build
     steps:
       - checkout:
           path: /tmp/project
@@ -31,6 +31,8 @@ jobs:
           - "Dockerfile"
   build-tag:
     <<: *defaults
+    docker:
+    - image: usumu/build
     steps:
       - checkout:
           path: /tmp/project
@@ -54,6 +56,8 @@ jobs:
           - "Dockerfile"
   deploy-branch:
     <<: *defaults
+    docker:
+    - image: usumu/build
     steps:
       - attach_workspace:
           at: /tmp/project
@@ -80,6 +84,8 @@ jobs:
     - run: docker push usumu/usumu:SNAPSHOT
   deploy-tag-github:
     <<: *defaults
+    docker:
+    - image: usumu/build
     steps:
       - add_ssh_keys:
       - attach_workspace:
