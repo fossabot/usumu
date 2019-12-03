@@ -8,13 +8,13 @@ import io.swagger.annotations.ExampleProperty;
 import io.usumu.api.subscription.entity.Subscription;
 
 public class SubscriptionCreateRequest {
-    public final Subscription.Type type;
+    public final Subscription.Method method;
     public final String value;
 
     @JsonCreator
     public SubscriptionCreateRequest(
         @ApiParam(
-            value = "Subscriber type.",
+            value = "Subscriber method.",
             required = true,
             type = "body",
             examples = @Example({
@@ -22,8 +22,8 @@ public class SubscriptionCreateRequest {
                 @ExampleProperty("SMS")
             })
         )
-        @JsonProperty("type")
-        Subscription.Type type,
+        @JsonProperty("method")
+        Subscription.Method method,
         @ApiParam(
             value = "Subscriber contact info, EMAIL or SMS",
             required = true,
@@ -36,7 +36,7 @@ public class SubscriptionCreateRequest {
         @JsonProperty("value")
             String value
     ) {
-        this.type = type;
+        this.method = method;
 
         this.value = value;
     }

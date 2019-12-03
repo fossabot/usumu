@@ -6,43 +6,45 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-import zone.refactor.spring.hateoas.annotation.ListingEndpoint;
+import zone.refactor.spring.hateoas.annotation.EntityEndpoint;
 
 @RestController
 @Api(
         tags = "Logs"
 )
 @RequestMapping("/subscriptions/{value}/logs")
-public class LogListApi {
+public class LogGetApi {
     @ApiOperation(
-            nickname = "listLogs",
-            value = "List logs for subscriber",
-            notes = "List all log entries related to a subscription. These logs are preserved even after deletion as legal proof.",
+            nickname = "getLogEntry",
+            value = "Get a log entry",
+            notes = "Get a single log entry for a subscription.",
             consumes = "application/json",
             produces = "application/json"
     )
     @ApiResponses(
             value = {
-                    @ApiResponse(
-                        code = 200,
-                        message = "A list of all transactions related to a subscription.",
-                        response = SubscriptionLogEntryList.class
-                    ),
+                    @ApiResponse(code = 200, message = "A subscription log entry.", response = SubscriptionLogEntryResource.class),
             }
     )
     @RequestMapping(
-            method = RequestMethod.GET
+        method = RequestMethod.GET,
+        value = "/{id}"
     )
-    @ListingEndpoint(SubscriptionLogEntryResource.class)
-    public SubscriptionLogEntryList list(
+    @EntityEndpoint(SubscriptionLogEntryResource.class)
+    public SubscriptionLogEntryResource list(
             @ApiParam(
                     value = "Subscription ID, or subscriber contact info (EMAIL or PHONE in international format)",
                     required = true
             )
             @PathVariable
-            String value
+            String value,
+            @ApiParam(
+                value = "The log entry ID",
+                required = true
+            )
+            @PathVariable
+            String id
     ) {
             return null;
     }
-
 }

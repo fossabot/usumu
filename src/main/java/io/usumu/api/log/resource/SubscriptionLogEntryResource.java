@@ -14,7 +14,7 @@ public class SubscriptionLogEntryResource extends LinkedEntity<SelfUpLink> {
     public final String id;
     public final String subscriptionId;
     public final LocalDateTime time;
-    public final SubscriptionLogEntry.Type type;
+    public final SubscriptionLogEntry.EntryType entryType;
     public final String ipAddress;
     @Nullable
     public final String newsletterId;
@@ -30,7 +30,7 @@ public class SubscriptionLogEntryResource extends LinkedEntity<SelfUpLink> {
         id = logEntry.id;
         subscriptionId = logEntry.subscriptionId;
         time = logEntry.time;
-        type = logEntry.type;
+        entryType = logEntry.entryType;
         ipAddress = logEntry.ipAddress;
         newsletterId = logEntry.newsletterId;
     }

@@ -8,7 +8,7 @@ public class SubscriptionLogEntry {
     public final String id;
     public final String subscriptionId;
     public final LocalDateTime time;
-    public final Type type;
+    public final EntryType entryType;
     public final String ipAddress;
     @Nullable
     public final String newsletterId;
@@ -18,19 +18,19 @@ public class SubscriptionLogEntry {
         String id,
         String subscriptionId,
         LocalDateTime time,
-        Type type,
+        EntryType entryType,
         String ipAddress,
         @Nullable String newsletterId
     ) {
         this.id = id;
         this.subscriptionId = subscriptionId;
         this.time = time;
-        this.type = type;
+        this.entryType = entryType;
         this.ipAddress = ipAddress;
         this.newsletterId = newsletterId;
     }
 
-    public enum Type {
+    public enum EntryType {
         CREATED,
         VERIFIED,
         NEWSLETTER,

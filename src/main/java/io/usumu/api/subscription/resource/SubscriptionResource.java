@@ -2,6 +2,7 @@ package io.usumu.api.subscription.resource;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import io.usumu.api.crypto.HashGenerator;
 import io.usumu.api.log.resource.SubscriptionLogEntryResource;
 import io.usumu.api.subscription.entity.Subscription;
@@ -15,20 +16,29 @@ import zone.refactor.spring.hateoas.entity.LinkedEntity;
 )
 public class SubscriptionResource extends LinkedEntity<SubscriptionResourceLinks> {
     @SuppressWarnings("WeakerAccess")
+    @ApiModelProperty(value = "id", required = true)
     @JsonProperty(value = "id", required = true)
     public final String id;
     @SuppressWarnings("WeakerAccess")
-    @JsonProperty(value = "type", required = true)
-    public final Subscription.Type type;
+
+    @ApiModelProperty(value = "method", required = true)
+    @JsonProperty(value = "method", required = true)
+    public final Subscription.Method method;
     @SuppressWarnings("WeakerAccess")
+
     @Nullable
+    @ApiModelProperty(value = "value", required = false)
     @JsonProperty(value = "value", required = false)
     public final String value;
+
     @SuppressWarnings("WeakerAccess")
     @Nullable
+    @ApiModelProperty(value = "verificationCode", required = false)
     @JsonProperty(value = "verificationCode", required = false)
     public final String verificationCode;
+
     @SuppressWarnings("WeakerAccess")
+    @ApiModelProperty(value = "status", required = true)
     @JsonProperty(value = "status", required = true)
     public final Subscription.Status status;
 
@@ -55,7 +65,7 @@ public class SubscriptionResource extends LinkedEntity<SubscriptionResourceLinks
             )
         );
         id = subscription.id;
-        type = subscription.type;
+        method = subscription.method;
         value = subscription.value;
         status = subscription.status;
         verificationCode = subscription.getVerificationCode(hashGenerator);

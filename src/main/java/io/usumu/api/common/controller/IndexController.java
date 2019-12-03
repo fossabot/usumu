@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import zone.refactor.spring.hateoas.annotation.EntityEndpoint;
 import zone.refactor.spring.hateoas.contract.LinkProvider;
 
 @RestController
@@ -23,6 +24,7 @@ public class IndexController {
         this.linkProvider = linkProvider;
     }
 
+    @EntityEndpoint(IndexResponse.class)
     @RequestMapping(
         method = RequestMethod.GET
     )

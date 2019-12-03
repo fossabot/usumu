@@ -21,7 +21,9 @@ import java.net.URLEncoder;
         "USUMU_INIT_VECTOR=bieng4weengoh0pengeSheGaibi4ve4i",
         "USUMU_S3_ENDPOINT=http://localhost:8001",
         "USUMU_S3_REGION=us-west-2",
-        "USUMU_S3_BUCKET=subscriptions"
+        "USUMU_S3_BUCKET=subscriptions",
+        "USUMU_S3_ACCESS_KEY_ID=asdf",
+        "USUMU_S3_SECRET_ACCESS_KEY=asdf"
     },
     webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT
 )
@@ -34,14 +36,14 @@ public class SubscriptionSteps {
         this.variableStorage = variableStorage;
     }
 
-    @Given("^I created a subscriber with the type \"([^\"]*)\" and the value \"([^\"]*)\"$")
-    @When("^I create a subscriber with the type \"([^\"]*)\" and the value \"([^\"]*)\"$")
+    @Given("^I created a subscriber with the method \"([^\"]*)\" and the value \"([^\"]*)\"$")
+    @When("^I create a subscriber with the method \"([^\"]*)\" and the value \"([^\"]*)\"$")
     public void createSubscriber(
         String type,
         String value
     ) {
         final SubscriptionCreateRequest request = new SubscriptionCreateRequest(
-            Subscription.Type.fromString(type),
+            Subscription.Method.fromString(type),
             value
         );
 
@@ -71,17 +73,17 @@ public class SubscriptionSteps {
     @Given("^the last call returned a subscription(?:|,|\\.)$")
     @When("^the last call returns a subscription(?:|,|\\.)$")
     @Then("^the last call should return a subscription(?:|,|\\.)$")
-    public void checkSubscriberTypeAndValue() {
+    public void checkLastReturnIsSubscription() {
         assert responseStorage.lastResponse != null;
         assert responseStorage.lastResponse.getBody().getObject().get("@type").equals("Subscription");
     }
 
-    @Given("^the subscription in the last response had the type \"(.*)\" and the value \"(.*)\",$")
-    @When("^the subscription in the last response has the type \"(.*)\" and the value \"(.*)\",$")
-    @Then("^the subscription in the last response should have the type \"(.*)\" and the value \"(.*)\",$")
+    @Given("^the subscription in the last response had the method \"(.*)\" and the value \"(.*)\",$")
+    @When("^the subscription in the last response has the method \"(.*)\" and the value \"(.*)\",$")
+    @Then("^the subscription in the last response should have the method \"(.*)\" and the value \"(.*)\",$")
     public void dataCheck(String type, String value) {
         final JsonNode json = responseStorage.lastResponse.getBody();
-        assert json.getObject().get("type").equals(variableStorage.resolve(type));
+        assert json.getObject().get("method").equals(variableStorage.resolve(type));
         assert json.getObject().get("value").equals(variableStorage.resolve(value));
     }
 

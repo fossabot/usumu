@@ -57,7 +57,7 @@ public class SubscriptionListResponse extends LinkedEntity<SubscriptionListRespo
     ) {
         super(new SubscriptionListResponseLinks(
             linkProvider.getResourceListLink(SubscriptionResource.class),
-            linkProvider.getResourceListLink(IndexResponse.class),
+            linkProvider.getResourceLink(IndexResponse.class),
             getNextLink(linkProvider, continuationToken)
         ));
         this.subscriptions = subscriptions.stream().map(subscription -> new SubscriptionResource(

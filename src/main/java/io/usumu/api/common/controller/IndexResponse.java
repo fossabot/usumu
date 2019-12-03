@@ -17,7 +17,7 @@ public class IndexResponse extends LinkedEntity<IndexResponse.IndexLinks> {
         public final Link subscriptions;
 
         public IndexLinks(LinkProvider linkProvider) {
-            super(linkProvider.getResourceListLink(IndexResponse.class));
+            super(linkProvider.getResourceLink(IndexResponse.class));
             subscriptions = linkProvider.getResourceListLink(SubscriptionResource.class).withRel("subscriptions");
         }
     }

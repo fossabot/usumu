@@ -51,7 +51,7 @@ public class SubscriptionDeleteApi {
     @ApiOperation(
         nickname = "deleteSubscription",
         value = "Delete a subscription",
-        notes = "Delete a subscription by providing the subscription type (EMAIL or SMS)." +
+        notes = "Delete a subscription by providing the subscription entryType (EMAIL or SMS)." +
             "The value in this case is either the phone number in international format, or the e-mail address.",
         consumes = "application/json",
         produces = "application/json"

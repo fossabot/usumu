@@ -59,7 +59,7 @@ public class SubscriptionCreateApi {
     @ApiOperation(
         nickname = "createSubscription",
         value = "Create a subscription",
-        notes = "Create a subscription by providing the subscription type (EMAIL or SMS) and the contact details." +
+        notes = "Create a subscription by providing the subscription entryType (EMAIL or SMS) and the contact details." +
                 "The value in this case is either the phone number in international format (+123456789), or the e-mail address." +
                 "When the subscription is created a confirmation message is sent to the user to confirm their" +
                 "subscription.",
@@ -75,7 +75,7 @@ public class SubscriptionCreateApi {
                     ),
                     @ApiResponse(
                         code = 400,
-                        message = "When the given value is invalid for the given type",
+                        message = "When the given value is invalid for the given entryType",
                         response = InvalidParameters.class
                     ),
                     @ApiResponse(
@@ -119,7 +119,7 @@ public class SubscriptionCreateApi {
         } catch (SubscriptionNotFound subscriptionNotFound) {
             //Create new subscription
             subscription = new Subscription(
-                request.type,
+                request.method,
                 request.value,
                 hashGenerator,
                 secretGenerator

@@ -73,7 +73,8 @@ public class SubscriptionListApi {
         Integer itemCount,
 
         @ApiParam(
-            value = "Token to continue a listing"
+            value = "Token to continue a listing",
+            allowEmptyValue = true
         )
         @RequestParam(required = false, defaultValue = "")
         @Nullable

@@ -42,7 +42,7 @@ public class SubscriptionGetApi {
     @ApiOperation(
         nickname = "getSubscription",
         value = "Get a subscription",
-        notes = "Get a subscription by providing the subscription type (EMAIL or SMS)." +
+        notes = "Get a subscription by providing the subscription entryType (EMAIL or SMS)." +
             "The value in this case is either the phone number in international format, or the e-mail address.",
         consumes = "application/json",
         produces = "application/json"

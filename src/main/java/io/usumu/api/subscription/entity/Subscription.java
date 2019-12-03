@@ -20,10 +20,10 @@ public class Subscription {
     @SuppressWarnings("WeakerAccess")
     public final String id;
     /**
-     * The type (EMAIL or SMS) of the subscriber
+     * The entryType (EMAIL or SMS) of the subscriber
      */
     @SuppressWarnings("WeakerAccess")
-    public final Type type;
+    public final Method method;
     /**
      * The e-mail address or phone number of the subscriber.
      */
@@ -42,16 +42,16 @@ public class Subscription {
     public final byte[] secret;
 
     public Subscription(
-            Type type,
+            Method method,
             String value,
             HashGenerator hashGenerator,
             SecretGenerator secretGenerator
     ) throws InvalidParameters {
         ValidatorChain validatorChain = new ValidatorChain();
 
-        validatorChain.addValidator("type", new RequiredValidator());
+        validatorChain.addValidator("entryType", new RequiredValidator());
         validatorChain.addValidator("value", new RequiredValidator());
-        switch(type) {
+        switch(method) {
             case EMAIL:
                 validatorChain.addValidator("value", new FormalEmailValidator());
                 break;
@@ -59,19 +59,19 @@ public class Subscription {
                 validatorChain.addValidator("value", new PhoneNumberValidator());
                 break;
             default:
-                if (type != null) {
-                    throw new RuntimeException("Unsupported type: " + type);
+                if (method != null) {
+                    throw new RuntimeException("Unsupported entryType: " + method);
                 }
         }
 
         Map<String, Object> data = new HashMap<>();
-        data.put("type", type);
+        data.put("method", method);
         data.put("value", value);
 
         validatorChain.validate(data);
 
         this.id = hashGenerator.generateHash(value);
-        this.type = type;
+        this.method = method;
         this.value = value;
         this.status = Status.UNCONFIRMED;
         this.secret = secretGenerator.get();
@@ -81,8 +81,8 @@ public class Subscription {
     public Subscription(
         @JsonProperty("id")
             String id,
-            @JsonProperty("type")
-            Type type,
+            @JsonProperty("method")
+            Method method,
             @Nullable
             @JsonProperty("value")
             String value,
@@ -92,7 +92,7 @@ public class Subscription {
             byte[] secret
     ) {
         this.id = id;
-        this.type = type;
+        this.method = method;
         this.value = value;
         this.status = status;
         this.secret = secret;
@@ -107,7 +107,7 @@ public class Subscription {
             //Rotate the secret
             return new Subscription(
                     id,
-                    type,
+                    method,
                     value,
                     Status.CONFIRMED,
                     secretGenerator.get()
@@ -119,7 +119,7 @@ public class Subscription {
     public Subscription unsubscribe() {
         return new Subscription(
                 id,
-                type,
+                method,
                 null,
                 Status.UNSUBSCRIBED,
                 secret
@@ -129,7 +129,7 @@ public class Subscription {
     public Subscription withSubscribeInitiated(String value, GlobalSecret globalSecret) {
         return new Subscription(
             id,
-            type,
+            method,
             value,
             Status.UNCONFIRMED,
             globalSecret.secret
@@ -139,20 +139,20 @@ public class Subscription {
     public Subscription withUnsubscribed() {
         return new Subscription(
             id,
-            type,
+            method,
             null,
             Status.UNSUBSCRIBED,
             new byte[0]
         );
     }
 
-    public enum Type {
+    public enum Method {
         EMAIL,
         SMS;
 
-        public static Type fromString(String type) {
-            for (Type value : Type.values()) {
-                if (value.toString().equalsIgnoreCase(type)) {
+        public static Method fromString(String method) {
+            for (Method value : Method.values()) {
+                if (value.toString().equalsIgnoreCase(method)) {
                     return value;
                 }
             }
