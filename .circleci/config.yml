@@ -25,6 +25,10 @@ jobs:
           root: /tmp/project
           paths:
             - "target/*.jar"
+      - persist_to_workspace:
+          root: /tmp/project
+          paths:
+          - "Dockerfile"
   build-tag:
     <<: *defaults
     steps:
@@ -44,6 +48,10 @@ jobs:
           root: /tmp/project
           paths:
             - "target/*.jar"
+      - persist_to_workspace:
+          root: /tmp/project
+          paths:
+          - "Dockerfile"
   deploy-branch:
     <<: *defaults
     steps:
@@ -56,7 +64,20 @@ jobs:
       - run: rm /release/cli-${CIRCLE_BRANCH}-SNAPSHOT-sources.jar
       - run: rm /release/cli-${CIRCLE_BRANCH}-SNAPSHOT.jar
       - run: ghr -u janoszen -r usumu -recreate -prerelease ${CIRCLE_BRANCH}-SNAPSHOT /release
-  deploy-tag:
+  deploy-branch-docker:
+    machine: true
+    steps:
+    - attach_workspace:
+        at: /tmp/project
+    - run:
+        command: docker build -t usumu/usumu:${CIRCLE_BRANCH}-SNAPSHOT
+    - run:
+        command: docker build -t usumu/usumu:SNAPSHOT
+    - run: |
+        echo "$DOCKER_PASS" | docker login --username $DOCKER_USER --password-stdin
+    - run: docker push usumu/usumu:${CIRCLE_BRANCH}-SNAPSHOT
+    - run: docker push usumu/usumu:SNAPSHOT
+  deploy-tag-github:
     <<: *defaults
     steps:
       - add_ssh_keys:
@@ -70,12 +91,34 @@ jobs:
       - run: rm /release/cli-${CIRCLE_TAG}.jar
       - run: ghr -u janoszen -r usumu -recreate ${CIRCLE_TAG} /release
       - run: rm -rf /tmp/project
+  deploy-tag-docker:
+    machine: true
+    steps:
+    - attach_workspace:
+        at: /tmp/project
+    - run:
+        command: docker build -t usumu/usumu:${CIRCLE_TAG}
+    - run:
+        command: docker build -t usumu/usumu:LATEST
+    - run: |
+        echo "$DOCKER_PASS" | docker login --username $DOCKER_USER --password-stdin
+    - run: docker push usumu/usumu:${CIRCLE_TAG}
+    - run: docker push usumu/usumu:LATEST
 workflows:
   version: 2
   build-and-deploy:
     jobs:
       - build-branch:
           context: build
+          filters:
+            branches:
+              ignore: gh-pages
+            tags:
+              ignore: /.*/
+      - deploy-branch-docker:
+          context: build
+          requires:
+          - build-branch
           filters:
             branches:
               ignore: gh-pages
@@ -88,10 +131,19 @@ workflows:
               ignore: /.*/
             tags:
               ignore: /.*-SNAPSHOT/
-      - deploy-tag:
+      - deploy-tag-github:
           context: build
           requires:
             - build-tag
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              ignore: /.*-SNAPSHOT/
+      - deploy-tag-docker:
+          context: build
+          requires:
+          - build-tag
           filters:
             branches:
               ignore: /.*/
