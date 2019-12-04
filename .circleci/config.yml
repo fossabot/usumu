@@ -77,7 +77,7 @@ jobs:
     - run:
         command: docker build --build-arg VERSION=${CIRCLE_BRANCH}-SNAPSHOT -t usumu/usumu:${CIRCLE_BRANCH}-snapshot .
     - run:
-        command: docker tag usumu/usumu:${CIRCLE_BRANCH}-SNAPSHOT usumu/usumu:snapshot
+        command: docker tag usumu/usumu:${CIRCLE_BRANCH}-snapshot usumu/usumu:snapshot
     - run: |
         echo "$DOCKER_PASSWORD" | docker login --username $DOCKER_USER --password-stdin
     - run: docker push usumu/usumu:${CIRCLE_BRANCH}-snapshot
