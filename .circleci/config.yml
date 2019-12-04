@@ -75,9 +75,9 @@ jobs:
     - attach_workspace:
         at: /tmp/project
     - run:
-        command: docker build -t usumu/usumu:${CIRCLE_BRANCH}-SNAPSHOT .
+        command: docker build --build-arg VERSION=${CIRCLE_BRANCH}-SNAPSHOT -t usumu/usumu:${CIRCLE_BRANCH}-snapshot .
     - run:
-        command: docker build -t usumu/usumu:SNAPSHOT .
+        command: docker tag usumu/usumu:${CIRCLE_BRANCH}-SNAPSHOT usumu/usumu:snapshot .
     - run: |
         echo "$DOCKER_PASSWORD" | docker login --username $DOCKER_USER --password-stdin
     - run: docker push usumu/usumu:${CIRCLE_BRANCH}-snapshot
@@ -105,9 +105,9 @@ jobs:
     - attach_workspace:
         at: /tmp/project
     - run:
-        command: docker build -t usumu/usumu:${CIRCLE_TAG} .
+        command: docker build --build-arg VERSION=${CIRCLE_TAG} -t usumu/usumu:${CIRCLE_TAG} .
     - run:
-        command: docker build -t usumu/usumu:LATEST .
+        command: docker tag usumu/usumu:${CIRCLE_TAG} usumu/usumu:latest .
     - run: |
         echo "$DOCKER_PASSWORD" | docker login --username $DOCKER_USER --password-stdin
     - run: docker push usumu/usumu:${CIRCLE_TAG}

@@ -6,6 +6,8 @@ WORKDIR /opt/usumu
 
 EXPOSE 8080
 
+ARG VERSION
+
 ENV USUMU_SECRET=""
 ENV USUMU_INIT_VECTOR=""
 ENV USUMU_S3_ACCESS_KEY_ID=""
@@ -14,5 +16,5 @@ ENV USUMU_S3_REGION=""
 ENV USUMU_S3_BUCKET=""
 ENV USUMU_S3_BUCKET_HOST=""
 
-ENTRYPOINT ["/usr/bin/java", "-jar", "/opt/usumu/api-1.0-SNAPSHOT.jar"]
+ENTRYPOINT ["/usr/bin/java", "-jar", "/opt/usumu/api-${VERSION}.jar"]
 CMD []
