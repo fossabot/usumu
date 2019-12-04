@@ -1,6 +1,7 @@
 package io.usumu.api;
 
 import com.google.common.base.Predicates;
+import io.swagger.annotations.Api;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -23,7 +24,7 @@ public class SwaggerConfig {
     public Docket api() {
         return new Docket(DocumentationType.SWAGGER_2)
                 .select()
-                    .apis(RequestHandlerSelectors.any())
+                    .apis(RequestHandlerSelectors.withClassAnnotation(Api.class))
                     .paths(Predicates.not(PathSelectors.regex("/error.*")))
                 .build()
                 .apiInfo(metadata())
@@ -36,14 +37,6 @@ public class SwaggerConfig {
                         new Tag(
                                 "Logs",
                                 "Retreive transaction logs for a certain subscriber (email, phone)."
-                        ),
-                        new Tag(
-                                "Newsletter",
-                                "Manage and send out newsletters."
-                        ),
-                        new Tag(
-                                "Metadata",
-                                "Store metadata for subscribers."
                         )
                 )
                 .useDefaultResponseMessages(false)
@@ -53,8 +46,16 @@ public class SwaggerConfig {
     public static ApiInfo metadata(){
         return new ApiInfoBuilder()
                 .title("Usumu API")
-                .description("Usumu is a self-hosted newsletter subscription microservice. It contains no authentication or authorization features, its only job is to store subscriber data securely.")
-                .version("1.x")
+                .description(
+                    "Usumu is a self-hosted newsletter subscription microservice. It contains no authentication or " +
+                        "authorization features, its only job is to store subscriber data securely.\n\n" +
+                        "" +
+                        "The API can be used by any standard HTTP client. It should submit data in the JSON " +
+                        "format and the response will also be in the JSON format. It is recommended that the " +
+                        "`Accept` header should be set to the value of `application/json` for forward compatibility, " +
+                        "as well as the `Content-Type` header for any requests with a body."
+                )
+                .version(SwaggerConfig.class.getPackage().getImplementationVersion())
                 .build();
     }
 }

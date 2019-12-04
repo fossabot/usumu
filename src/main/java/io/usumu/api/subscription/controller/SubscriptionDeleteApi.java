@@ -9,7 +9,6 @@ import io.usumu.api.subscription.exception.SubscriptionAlreadyDeleted;
 import io.usumu.api.subscription.exception.SubscriptionNotFound;
 import io.usumu.api.subscription.resource.SubscriptionResource;
 import io.usumu.api.subscription.storage.SubscriptionStorageGet;
-import io.usumu.api.subscription.storage.SubscriptionStorageList;
 import io.usumu.api.subscription.storage.SubscriptionStorageUpsert;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,7 +23,6 @@ import zone.refactor.spring.hateoas.contract.LinkProvider;
 )
 @RequestMapping("/subscriptions")
 public class SubscriptionDeleteApi {
-    private final SubscriptionStorageList subscriptionStorageList;
     private final SubscriptionStorageGet subscriptionStorageGet;
     private final SubscriptionStorageUpsert subscriptionStorageUpsert;
     private final EntityCrypto entityCrypto;
@@ -33,14 +31,12 @@ public class SubscriptionDeleteApi {
 
     @Autowired
     public SubscriptionDeleteApi(
-        SubscriptionStorageList subscriptionStorageList,
         SubscriptionStorageGet subscriptionStorageGet,
         SubscriptionStorageUpsert subscriptionStorageUpsert,
         EntityCrypto entityCrypto,
         LinkProvider linkProvider,
         HashGenerator hashGenerator
     ) {
-        this.subscriptionStorageList = subscriptionStorageList;
         this.subscriptionStorageGet = subscriptionStorageGet;
         this.subscriptionStorageUpsert = subscriptionStorageUpsert;
         this.entityCrypto = entityCrypto;

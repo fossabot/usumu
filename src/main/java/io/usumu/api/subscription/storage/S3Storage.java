@@ -43,6 +43,7 @@ public class S3Storage implements SubscriptionStorageUpsert, SubscriptionStorage
 
     @Override
     public EncryptedSubscription get(String hash) throws SubscriptionNotFound {
+        //todo this may leak value to S3 provider. Fix by employing type detection.
         S3Object object;
         try {
             object = s3Factory
