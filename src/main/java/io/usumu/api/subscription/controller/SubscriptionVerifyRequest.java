@@ -2,10 +2,10 @@ package io.usumu.api.subscription.controller;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiParam;
-import org.springframework.web.bind.annotation.RequestParam;
 
 public class SubscriptionVerifyRequest {
-    @JsonProperty("verificationCode")
+    @SuppressWarnings("WeakerAccess")
+    @JsonProperty(value = "verificationCode", required = true)
     public final String verificationCode;
 
     public SubscriptionVerifyRequest(
@@ -13,7 +13,7 @@ public class SubscriptionVerifyRequest {
             value = "Verification code for the address.",
             required = true
         )
-        @JsonProperty(value = "verificationCode", required = false)
+        @JsonProperty(value = "verificationCode")
         String verificationCode
     ) {
         this.verificationCode = verificationCode;

@@ -1,5 +1,6 @@
 package io.usumu.api.subscription.controller;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiParam;
 import io.usumu.api.common.controller.IndexResponse;
@@ -19,23 +20,23 @@ import java.util.stream.Collectors;
 @SuppressWarnings("WeakerAccess")
 @ApiModel("SubscriptionList")
 public class SubscriptionListResponse extends LinkedEntity<SubscriptionListResponseLinks> {
-    public final static String TYPE = "subscriptionList";
-
     @ApiParam(
         value = "The list of subscriptions",
         required = true
     )
+    @JsonProperty(value = "subscriptions", required = true)
     public final List<SubscriptionResource> subscriptions;
 
     @Nullable
     @ApiParam(
         value = "This token can be used to continue a listing."
     )
+    @JsonProperty(value = "continuationToken")
     public final String continuationToken;
 
     @Nullable
     private static Link getNextLink(LinkProvider linkProvider, @Nullable String continuationToken) {
-        if (continuationToken == null) {
+        if (continuationToken == null || continuationToken.isEmpty()) {
             return null;
         }
         Link next = linkProvider.getResourceListLink(SubscriptionResource.class).withNextRel();
@@ -63,6 +64,6 @@ public class SubscriptionListResponse extends LinkedEntity<SubscriptionListRespo
         this.subscriptions = subscriptions.stream().map(subscription -> new SubscriptionResource(
             subscription, hashGenerator, linkProvider
         )).collect(Collectors.toList());
-        this.continuationToken = continuationToken;
+        this.continuationToken = continuationToken == null || continuationToken.isEmpty()?null:continuationToken;
     }
 }
