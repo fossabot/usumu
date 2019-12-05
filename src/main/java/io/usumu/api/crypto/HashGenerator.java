@@ -31,7 +31,6 @@ public class HashGenerator {
         } catch (NoSuchAlgorithmException | InvalidKeyException e) {
             throw new RuntimeException(e);
         }
-
     }
 
     public String generateHash(String value) {

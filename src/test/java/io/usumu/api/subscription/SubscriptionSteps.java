@@ -36,8 +36,8 @@ public class SubscriptionSteps {
         this.variableStorage = variableStorage;
     }
 
-    @Given("^I created a subscriber with the method \"([^\"]*)\" and the value \"([^\"]*)\"$")
-    @When("^I create a subscriber with the method \"([^\"]*)\" and the value \"([^\"]*)\"$")
+    @Given("^I created a subscriber with the method \"([^\"]*)\" and the value \"([^\"]*)\"(?:|,|\\.)$")
+    @When("^I create a subscriber with the method \"([^\"]*)\" and the value \"([^\"]*)\"(?:|,|\\.)$")
     public void createSubscriber(
         String type,
         String value
@@ -87,6 +87,12 @@ public class SubscriptionSteps {
         assert json.getObject().get("value").equals(variableStorage.resolve(value));
     }
 
+    @Then("^the subscription in the last response should not have a value.$")
+    public void noValue() {
+        final JsonNode json = responseStorage.lastResponse.getBody();
+        assert json.getObject().get("value") == null;
+    }
+
     @Given("^the subscription in the last response had the status \"([^\"]+)\"(?:|,|\\.)$")
     @When("^the subscription in the last response has the status \"([^\"]+)\"(?:|,|\\.)$")
     @Then("^the subscription in the last response should have the status \"([^\"]+)\"(?:|,|\\.)$")
@@ -107,6 +113,22 @@ public class SubscriptionSteps {
                 .header("Content-Type", "application/json")
                 .accept("application/json")
                 .body(verifyRequest)
+                .asJson();
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
+
+    @Given("^I deleted the subscription \"(.*)\"(?:|,|\\.)$")
+    @When("^I delete the subscription \"(.*)\"(?:|,|\\.)$")
+    public void delete(String value) {
+        try {
+            responseStorage.lastResponse = Unirest
+                .delete("http://localhost:8080/subscriptions/" + URLEncoder.encode(variableStorage.resolve(value), "UTF-8"))
+                .header("Content-Type", "application/json")
+                .accept("application/json")
                 .asJson();
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);

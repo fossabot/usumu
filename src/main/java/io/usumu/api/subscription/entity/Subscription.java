@@ -99,6 +99,9 @@ public class Subscription {
     }
 
     public String getVerificationCode(HashGenerator hashGenerator) {
+        if (secret.length == 0) {
+            return null;
+        }
         return hashGenerator.generateHash("confirmation", secret);
     }
 
