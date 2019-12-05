@@ -102,11 +102,11 @@ public class Subscription {
         if (secret.length == 0) {
             return null;
         }
-        return hashGenerator.generateHash("confirmation", secret);
+        return hashGenerator.generateHash("confirmation", secret).substring(0,8);
     }
 
     public Subscription verify(HashGenerator hashGenerator, SecretGenerator secretGenerator, String verificationCode) throws VerificationFailed {
-        if (verificationCode.equals(hashGenerator.generateHash("confirmation", secret))) {
+        if (verificationCode.equals(getVerificationCode(hashGenerator))) {
             //Rotate the secret
             return new Subscription(
                     id,
