@@ -16,5 +16,8 @@ ENV USUMU_S3_REGION=""
 ENV USUMU_S3_BUCKET=""
 ENV USUMU_S3_BUCKET_HOST=""
 
-ENTRYPOINT ["/usr/bin/java", "-jar", "/opt/usumu/api-${VERSION}.jar"]
+RUN echo -e "#!/bin/sh\nexec /usr/bin/java -jar /opt/usumu/api-${VERSION}.jar $@" >/init.sh
+RUN chmod +x /init.sh
+
+ENTRYPOINT ["/init.sh"]
 CMD []
