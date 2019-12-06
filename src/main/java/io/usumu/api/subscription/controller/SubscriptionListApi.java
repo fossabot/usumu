@@ -2,7 +2,6 @@ package io.usumu.api.subscription.controller;
 
 import io.swagger.annotations.*;
 import io.usumu.api.common.entity.PaginatedList;
-import io.usumu.api.common.validation.*;
 import io.usumu.api.crypto.EntityCrypto;
 import io.usumu.api.crypto.HashGenerator;
 import io.usumu.api.subscription.entity.EncryptedSubscription;
@@ -19,9 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import zone.refactor.spring.hateoas.annotation.ListingEndpoint;
 import zone.refactor.spring.hateoas.contract.LinkProvider;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -66,7 +63,8 @@ public class SubscriptionListApi {
     @ListingEndpoint(SubscriptionResource.class)
     public SubscriptionListResponse list(
         @ApiParam(
-            value = "The number of items to return"
+            value = "The number of items to return",
+            allowableValues = "range(1,100)"
         )
         @RequestParam(required = false)
         @Nullable
@@ -74,24 +72,13 @@ public class SubscriptionListApi {
 
         @ApiParam(
             value = "Token to continue a listing",
-            allowEmptyValue = true
+            allowEmptyValue = true,
+            allowableValues = "range(0,255)"
         )
         @RequestParam(required = false, defaultValue = "")
         @Nullable
         String continuationToken
-    ) throws InvalidParameters {
-        ValidatorChain validatorChain = new ValidatorChain();
-
-        validatorChain.addValidator("itemCount", new MinimumValidator(1));
-        validatorChain.addValidator("itemCount", new MaximumValidator(100));
-        validatorChain.addValidator("continuationToken", new SingleLineValidator());
-        validatorChain.addValidator("continuationToken", new MaximumLengthValidator(255));
-
-        Map<String, Object> data = new HashMap<>();
-        data.put("itemCount", itemCount);
-        data.put("continuationToken", continuationToken);
-        validatorChain.validate(data);
-
+    ) {
         PaginatedList<EncryptedSubscription> encryptedSubscriptions = subscriptionStorageList
             .list(itemCount == null ? 100 : itemCount, continuationToken);
 

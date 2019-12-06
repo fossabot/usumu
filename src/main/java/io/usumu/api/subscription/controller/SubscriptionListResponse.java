@@ -62,7 +62,7 @@ public class SubscriptionListResponse extends LinkedEntity<SubscriptionListRespo
             getNextLink(linkProvider, continuationToken)
         ));
         this.subscriptions = subscriptions.stream().map(subscription -> new SubscriptionResource(
-            subscription, hashGenerator, linkProvider
+            subscription, linkProvider
         )).collect(Collectors.toList());
         this.continuationToken = continuationToken == null || continuationToken.isEmpty()?null:continuationToken;
     }

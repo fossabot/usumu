@@ -6,7 +6,7 @@ import io.cucumber.java.en.When;
 import io.usumu.api.LastResponseStorage;
 import io.usumu.api.subscription.controller.SubscriptionCreateRequest;
 import io.usumu.api.subscription.controller.SubscriptionVerifyRequest;
-import io.usumu.api.subscription.entity.Subscription;
+import io.usumu.api.subscription.entity.SubscriptionMethod;
 import io.usumu.api.variable.VariableStorage;
 import kong.unirest.JsonNode;
 import kong.unirest.Unirest;
@@ -43,7 +43,7 @@ public class SubscriptionSteps {
         String value
     ) {
         final SubscriptionCreateRequest request = new SubscriptionCreateRequest(
-            Subscription.Method.fromString(type),
+            SubscriptionMethod.fromString(type),
             value
         );
 

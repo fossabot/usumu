@@ -71,6 +71,6 @@ public class SubscriptionGetApi {
             Subscription.class
         );
 
-        return new SubscriptionResource(subscription, hashGenerator, linkProvider);
+        return new SubscriptionResource(subscription, linkProvider);
     }
 }

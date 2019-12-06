@@ -5,6 +5,7 @@ import io.usumu.api.crypto.EntityCrypto;
 import io.usumu.api.crypto.HashGenerator;
 import io.usumu.api.subscription.entity.EncryptedSubscription;
 import io.usumu.api.subscription.entity.Subscription;
+import io.usumu.api.subscription.entity.SubscriptionStatus;
 import io.usumu.api.subscription.exception.SubscriptionAlreadyDeleted;
 import io.usumu.api.subscription.exception.SubscriptionNotFound;
 import io.usumu.api.subscription.resource.SubscriptionResource;
@@ -72,7 +73,7 @@ public class SubscriptionDeleteApi {
     ) throws SubscriptionNotFound, SubscriptionAlreadyDeleted {
         EncryptedSubscription encryptedSubscription = subscriptionStorageGet.get(value);
         Subscription subscription = entityCrypto.decrypt(encryptedSubscription.encryptedData, Subscription.class);
-        if (subscription.status.equals(Subscription.Status.UNSUBSCRIBED)) {
+        if (subscription.status.equals(SubscriptionStatus.UNSUBSCRIBED)) {
             throw new SubscriptionAlreadyDeleted();
         }
         subscription = subscription.withUnsubscribed();
@@ -80,7 +81,6 @@ public class SubscriptionDeleteApi {
 
         return new SubscriptionResource(
             subscription,
-            hashGenerator,
             linkProvider
         );
     }

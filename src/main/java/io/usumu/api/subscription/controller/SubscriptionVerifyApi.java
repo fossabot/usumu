@@ -91,7 +91,6 @@ public class SubscriptionVerifyApi {
 
         return new SubscriptionResource(
             subscription,
-            hashGenerator,
             linkProvider
         );
     }

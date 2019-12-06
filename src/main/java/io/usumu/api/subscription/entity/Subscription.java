@@ -9,7 +9,6 @@ import io.usumu.api.crypto.SecretGenerator;
 import io.usumu.api.subscription.exception.VerificationFailed;
 import org.springframework.lang.Nullable;
 
-import java.security.InvalidParameterException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,7 +22,7 @@ public class Subscription {
      * The entryType (EMAIL or SMS) of the subscriber
      */
     @SuppressWarnings("WeakerAccess")
-    public final Method method;
+    public final SubscriptionMethod method;
     /**
      * The e-mail address or phone number of the subscriber.
      */
@@ -34,7 +33,7 @@ public class Subscription {
      * Subscription status.
      */
     @SuppressWarnings("WeakerAccess")
-    public final Status status;
+    public final SubscriptionStatus status;
     /**
      * Secret used for generating verification codes.
      */
@@ -42,7 +41,7 @@ public class Subscription {
     public final byte[] secret;
 
     public Subscription(
-            Method method,
+            SubscriptionMethod method,
             String value,
             HashGenerator hashGenerator,
             SecretGenerator secretGenerator
@@ -73,7 +72,7 @@ public class Subscription {
         this.id = hashGenerator.generateHash(value);
         this.method = method;
         this.value = value;
-        this.status = Status.UNCONFIRMED;
+        this.status = SubscriptionStatus.UNCONFIRMED;
         this.secret = secretGenerator.get();
     }
 
@@ -82,12 +81,12 @@ public class Subscription {
         @JsonProperty("id")
             String id,
             @JsonProperty("method")
-            Method method,
+            SubscriptionMethod method,
             @Nullable
             @JsonProperty("value")
             String value,
             @JsonProperty("status")
-            Status status,
+            SubscriptionStatus status,
             @JsonProperty("secret")
             byte[] secret
     ) {
@@ -109,11 +108,11 @@ public class Subscription {
         if (verificationCode.equals(getVerificationCode(hashGenerator))) {
             //Rotate the secret
             return new Subscription(
-                    id,
-                    method,
-                    value,
-                    Status.CONFIRMED,
-                    secretGenerator.get()
+                id,
+                method,
+                value,
+                SubscriptionStatus.CONFIRMED,
+                secretGenerator.get()
             );
         }
         throw new VerificationFailed();
@@ -121,11 +120,11 @@ public class Subscription {
 
     public Subscription unsubscribe() {
         return new Subscription(
-                id,
-                method,
-                null,
-                Status.UNSUBSCRIBED,
-                secret
+            id,
+            method,
+            null,
+            SubscriptionStatus.UNSUBSCRIBED,
+            secret
         );
     }
 
@@ -134,7 +133,7 @@ public class Subscription {
             id,
             method,
             value,
-            Status.UNCONFIRMED,
+            SubscriptionStatus.UNCONFIRMED,
             globalSecret.secret
         );
     }
@@ -144,37 +143,9 @@ public class Subscription {
             id,
             method,
             null,
-            Status.UNSUBSCRIBED,
+            SubscriptionStatus.UNSUBSCRIBED,
             new byte[0]
         );
     }
 
-    public enum Method {
-        EMAIL,
-        SMS;
-
-        public static Method fromString(String method) {
-            for (Method value : Method.values()) {
-                if (value.toString().equalsIgnoreCase(method)) {
-                    return value;
-                }
-            }
-            throw new InvalidParameterException();
-        }
-    }
-
-    public enum Status {
-        UNCONFIRMED,
-        CONFIRMED,
-        UNSUBSCRIBED;
-
-        public static Status fromString(String status) {
-            for (Status value : Status.values()) {
-                if (value.toString().equalsIgnoreCase(status)) {
-                    return value;
-                }
-            }
-            throw new InvalidParameterException();
-        }
-    }
 }

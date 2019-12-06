@@ -11,6 +11,7 @@ import io.usumu.api.crypto.HashGenerator;
 import io.usumu.api.crypto.SecretGenerator;
 import io.usumu.api.subscription.entity.EncryptedSubscription;
 import io.usumu.api.subscription.entity.Subscription;
+import io.usumu.api.subscription.entity.SubscriptionStatus;
 import io.usumu.api.subscription.exception.SubscriptionAlreadyExists;
 import io.usumu.api.subscription.exception.SubscriptionNotFound;
 import io.usumu.api.subscription.resource.SubscriptionResource;
@@ -103,12 +104,12 @@ public class SubscriptionCreateApi {
             subscription = entityCrypto.decrypt(encryptedSubscription.encryptedData, Subscription.class);
 
             if (
-                subscription.status != Subscription.Status.UNCONFIRMED &&
-                subscription.status != Subscription.Status.UNSUBSCRIBED
+                subscription.status != SubscriptionStatus.UNCONFIRMED &&
+                subscription.status != SubscriptionStatus.UNSUBSCRIBED
             ) {
                 //Already subscribed and confirmed
                 throw new SubscriptionAlreadyExists();
-            } else if (subscription.status == Subscription.Status.UNSUBSCRIBED) {
+            } else if (subscription.status == SubscriptionStatus.UNSUBSCRIBED) {
                 //Resubscribe
                 subscription = subscription.withSubscribeInitiated(request.value, globalSecret);
                 encryptedSubscription = new EncryptedSubscription(
@@ -137,7 +138,6 @@ public class SubscriptionCreateApi {
 
         return new SubscriptionResource(
             subscription,
-            hashGenerator,
             linkProvider
         );
     }
