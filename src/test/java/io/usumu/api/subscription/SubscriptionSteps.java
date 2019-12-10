@@ -7,6 +7,7 @@ import io.usumu.api.LastResponseStorage;
 import io.usumu.api.subscription.controller.SubscriptionCreateRequest;
 import io.usumu.api.subscription.controller.SubscriptionVerifyRequest;
 import io.usumu.api.subscription.entity.SubscriptionMethod;
+import io.usumu.api.subscription.entity.SubscriptionStatus;
 import io.usumu.api.variable.VariableStorage;
 import kong.unirest.JsonNode;
 import kong.unirest.Unirest;
@@ -44,7 +45,32 @@ public class SubscriptionSteps {
     ) {
         final SubscriptionCreateRequest request = new SubscriptionCreateRequest(
             SubscriptionMethod.fromString(type),
-            value
+            value,
+            false,
+            null
+        );
+
+        responseStorage.lastResponse = Unirest
+            .post("http://127.0.0.1:8080/subscriptions")
+            .header("Content-Type", "application/json")
+            .accept("application/json")
+            .body(request)
+            .asJson();
+    }
+
+
+    @Given("^I imported a subscriber with the method \"([^\"]*)\" and the value \"([^\"]*)\" with status \"([^\"]*)\"(?:|,|\\.)$")
+    @When("^I import a subscriber with the method \"([^\"]*)\" and the value \"([^\"]*)\" with status \"([^\"]*)\"(?:|,|\\.)$")
+    public void importSubscriber(
+        String type,
+        String value,
+        String status
+    ) {
+        final SubscriptionCreateRequest request = new SubscriptionCreateRequest(
+            SubscriptionMethod.fromString(type),
+            value,
+            true,
+            SubscriptionStatus.fromString(status)
         );
 
         responseStorage.lastResponse = Unirest

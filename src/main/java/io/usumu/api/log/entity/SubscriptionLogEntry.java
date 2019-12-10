@@ -31,9 +31,12 @@ public class SubscriptionLogEntry {
     }
 
     public enum EntryType {
+        IMPORTED_CREATED,
         CREATED,
+        IMPORTED_VERIFIED,
         VERIFIED,
         NEWSLETTER,
+        IMPORTED_DELETED,
         DELETED
     }
 }
