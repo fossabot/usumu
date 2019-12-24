@@ -9,6 +9,16 @@
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
+    <name>Usumu</name>
+    <description>A cloud-first API-driven subscriber management and newsletter server.</description>
+    <developers>
+        <developer>
+            <id>janoszen</id>
+            <name>Janos Pasztor</name>
+            <url>https://pasztor.at</url>
+        </developer>
+    </developers>
+
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
