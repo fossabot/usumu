@@ -118,13 +118,25 @@ public class SubscriptionCreateApi {
                 subscriptionStorageUpsert.store(encryptedSubscription);
             }
         } catch (SubscriptionNotFound subscriptionNotFound) {
-            //Create new subscription
-            subscription = new Subscription(
-                request.method,
-                request.value,
-                hashGenerator,
-                secretGenerator
-            );
+
+            if (request.imported) {
+                //Create new subscription w. status
+                subscription = new Subscription(
+                    request.method,
+                    request.value,
+                    request.importStatus,
+                    hashGenerator,
+                    secretGenerator
+                );
+            } else {
+                //Create new subscription
+                subscription = new Subscription(
+                    request.method,
+                    request.value,
+                    hashGenerator,
+                    secretGenerator
+                );
+            }
 
             encryptedSubscription = new EncryptedSubscription(
                 subscription,
@@ -134,7 +146,10 @@ public class SubscriptionCreateApi {
             subscriptionStorageUpsert.store(encryptedSubscription);
         }
 
-        //todo notify user
+        if (!request.imported && subscription.status == SubscriptionStatus.UNCONFIRMED) {
+            //Send notification.
+
+        }
 
         return new SubscriptionResource(
             subscription,

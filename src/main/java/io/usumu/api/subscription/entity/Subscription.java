@@ -9,6 +9,7 @@ import io.usumu.api.crypto.SecretGenerator;
 import io.usumu.api.subscription.exception.VerificationFailed;
 import org.springframework.lang.Nullable;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -46,6 +47,22 @@ public class Subscription {
             HashGenerator hashGenerator,
             SecretGenerator secretGenerator
     ) throws InvalidParameters {
+        this(
+            method,
+            value,
+            SubscriptionStatus.UNCONFIRMED,
+            hashGenerator,
+            secretGenerator
+        );
+    }
+
+    public Subscription(
+        final SubscriptionMethod method,
+        final String value,
+        final SubscriptionStatus importStatus,
+        final HashGenerator hashGenerator,
+        final SecretGenerator secretGenerator
+    ) throws InvalidParameters {
         ValidatorChain validatorChain = new ValidatorChain();
 
         validatorChain.addValidator("entryType", new RequiredValidator());
@@ -66,15 +83,25 @@ public class Subscription {
         Map<String, Object> data = new HashMap<>();
         data.put("method", method);
         data.put("value", value);
+        data.put("status", importStatus);
 
         validatorChain.validate(data);
 
         this.id = hashGenerator.generateHash(value);
         this.method = method;
-        this.value = value;
-        this.status = SubscriptionStatus.UNCONFIRMED;
-        this.secret = secretGenerator.get();
+        if (importStatus == SubscriptionStatus.UNSUBSCRIBED) {
+            this.value = value;
+        } else {
+            this.value = null;
+        }
+        this.status = importStatus;
+        if (importStatus == SubscriptionStatus.UNSUBSCRIBED) {
+            this.secret = secretGenerator.get();
+        } else {
+            this.secret = null;
+        }
     }
+
 
     @JsonCreator
     public Subscription(

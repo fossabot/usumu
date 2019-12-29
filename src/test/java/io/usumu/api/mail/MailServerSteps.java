@@ -43,11 +43,22 @@ public class MailServerSteps {
         mailStorage.empty(email);
     }
 
-    @Given("^I received an e-mail to \"([^\"]*)\"$")
-    @When("^I receive an e-mail to \"([^\"]*)\"$")
-    @Then("^I should receive an e-mail to \"([^\"]*)\"$")
+    @Given("^I received an e-mail to \"([^\"]*)\"(?:|,|\\.)$")
+    @When("^I receive an e-mail to \"([^\"]*)\"(?:|,|\\.)$")
+    @Then("^I should receive an e-mail to \"([^\"]*)\"(?:|,|\\.)$")
     public void shouldReceiveEmail(String email) {
         assertTrue(mailStorage.read(email).size() > 0);
+    }
+
+    @Given("^the last e-mail to \"([^\"]*)\" contained a link to \"([^\"]*)\"(?:|,|\\.)$")
+    @When("^the last e-mail to \"([^\"]*)\" contains a link to \"([^\"]*)\"(?:|,|\\.)$")
+    @Then("^the last e-mail to \"([^\"]*)\" should contain a link to \"([^\"]*)\"(?:|,|\\.)$")
+    public void shouldContainLink(String email, Pattern linkPattern) throws Throwable {
+        assertTrue(mailStorage.read(email).size() > 0);
+        final Message lastEmail = mailStorage.read(email)
+            .get(mailStorage.read(email)
+                     .size() - 1);
+        assertTrue(findLink(linkPattern, lastEmail.message, null, null));
     }
 
     private boolean findLink(Pattern linkPattern, Part message, @Nullable String captureGroup, @Nullable String captureName) throws MessagingException, IOException {
