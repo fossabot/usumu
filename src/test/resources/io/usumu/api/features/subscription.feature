@@ -66,13 +66,11 @@ Feature: Subscriber management
     And the subscription in the last response should not have a value.
 
   Scenario: Deleting a subscription should result in the subscription actually being deleted
-    Given I created a subscriber with the method "EMAIL" and the value "test8@example.com",
-    And I stored the last response field "verificationCode" in the variable "verificationCode",
+    Given I imported a subscriber with the method "EMAIL" and the value "test8@example.com" with status "CONFIRMED",
     And I stored the last response field "id" in the variable "subscriptionId",
-    And I confirm the subscription "${subscriptionId}" with the code "${verificationCode}"
     And I delete the subscription "${subscriptionId}"
     And the last call succeeded,
-    When I fetch the subscription "test7@example.com"
+    When I fetch the subscription "test8@example.com"
     Then the last call should succeed,
     And the last call should return a subscription,
     And the subscription in the last response should have the status "UNSUBSCRIBED",

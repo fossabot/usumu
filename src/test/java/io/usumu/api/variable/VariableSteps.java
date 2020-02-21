@@ -21,10 +21,10 @@ public class VariableSteps {
     @Given("^I stored the last response field \"(.*)\" in the variable \"(.*)\"(?:|,|\\.)$")
     @When("^I store the last response field \"(.*)\" in the variable \"(.*)\"(?:|,|\\.)$")
     public void storeVariable(String field, String variable) {
-        assertNotNull(responseStorage.lastResponse);
-        assertNotNull(responseStorage.lastResponse.getBody());
-        assertNotNull(responseStorage.lastResponse.getBody().getObject());
-        assertTrue(responseStorage.lastResponse.getBody().getObject().has(field));
+        assertNotNull("No previous response.", responseStorage.lastResponse);
+        assertNotNull("Response body is null.", responseStorage.lastResponse.getBody());
+        assertNotNull("Response body is null.", responseStorage.lastResponse.getBody().getObject());
+        assertTrue("Response does not have a field " + field, responseStorage.lastResponse.getBody().getObject().has(field));
 
         variableStorage.store(variable, (String)responseStorage.lastResponse.getBody().getObject().get(field));
     }
