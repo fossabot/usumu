@@ -1,12 +1,9 @@
 package io.usumu.api.template;
 
 import io.swagger.annotations.ApiOperation;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Nullable;
-import javax.websocket.server.PathParam;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -24,16 +21,21 @@ public class TemplateUploadApi {
         this.templateProvider = templateProvider;
     }
 
-    @RequestMapping(value = {"/{filename}", "/{directory}/{filename}"})
+    @RequestMapping(
+        value = {"/{filename}", "/{directory}/{filename}"},
+        method = RequestMethod.PUT,
+        consumes = "text/plain",
+        produces = "text/plain"
+    )
     @ApiOperation(
         value = "Upload template file",
         nickname = "uploadFile"
     )
-    public void upload(
+    public String upload(
         @Nullable
-        @PathParam(value = "directory")
+        @PathVariable(value = "directory", required = false)
         String directory,
-        @PathParam("filename")
+        @PathVariable("filename")
         String filename,
         @RequestBody
         InputStream body
@@ -54,5 +56,7 @@ public class TemplateUploadApi {
         }
 
         templateProvider.save(file, out.toString());
+
+        return "";
     }
 }

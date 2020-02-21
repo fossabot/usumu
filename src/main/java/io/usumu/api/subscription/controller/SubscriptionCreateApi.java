@@ -9,6 +9,7 @@ import io.usumu.api.crypto.EntityCrypto;
 import io.usumu.api.crypto.GlobalSecret;
 import io.usumu.api.crypto.HashGenerator;
 import io.usumu.api.crypto.SecretGenerator;
+import io.usumu.api.mail.MailSender;
 import io.usumu.api.subscription.entity.EncryptedSubscription;
 import io.usumu.api.subscription.entity.Subscription;
 import io.usumu.api.subscription.entity.SubscriptionStatus;
@@ -17,6 +18,7 @@ import io.usumu.api.subscription.exception.SubscriptionNotFound;
 import io.usumu.api.subscription.resource.SubscriptionResource;
 import io.usumu.api.subscription.storage.SubscriptionStorageGet;
 import io.usumu.api.subscription.storage.SubscriptionStorageUpsert;
+import io.usumu.api.template.TemplateProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,19 +26,22 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import zone.refactor.spring.hateoas.contract.LinkProvider;
 
+import java.util.HashMap;
+
 @RestController
 @Api(
         tags = "Subscriptions"
 )
 @RequestMapping("/subscriptions")
 public class SubscriptionCreateApi {
-    private final SubscriptionStorageGet subscriptionStorageGet;
+    private final SubscriptionStorageGet    subscriptionStorageGet;
     private final SubscriptionStorageUpsert subscriptionStorageUpsert;
-    private final EntityCrypto entityCrypto;
+    private final EntityCrypto              entityCrypto;
     private final LinkProvider linkProvider;
     private final GlobalSecret globalSecret;
     private final SecretGenerator secretGenerator;
-    private final HashGenerator hashGenerator;
+    private final HashGenerator             hashGenerator;
+    private final MailSender                mailSender;
 
     @Autowired
     public SubscriptionCreateApi(
@@ -46,7 +51,8 @@ public class SubscriptionCreateApi {
         LinkProvider linkProvider,
         GlobalSecret globalSecret,
         SecretGenerator secretGenerator,
-        HashGenerator hashGenerator
+        HashGenerator hashGenerator,
+        final MailSender mailSender
     ) {
         this.subscriptionStorageGet = subscriptionStorageGet;
         this.subscriptionStorageUpsert = subscriptionStorageUpsert;
@@ -55,6 +61,7 @@ public class SubscriptionCreateApi {
         this.globalSecret = globalSecret;
         this.secretGenerator = secretGenerator;
         this.hashGenerator = hashGenerator;
+        this.mailSender = mailSender;
     }
 
     @ApiOperation(
@@ -94,7 +101,7 @@ public class SubscriptionCreateApi {
     public SubscriptionResource create(
         @RequestBody
         SubscriptionCreateRequest request
-    ) throws SubscriptionAlreadyExists, InvalidParameters {
+    ) throws SubscriptionAlreadyExists, InvalidParameters, TemplateProvider.TemplateNotFound {
         //todo race condition possible
         Subscription subscription;
         EncryptedSubscription encryptedSubscription;
@@ -147,8 +154,11 @@ public class SubscriptionCreateApi {
         }
 
         if (!request.imported && subscription.status == SubscriptionStatus.UNCONFIRMED) {
-            //Send notification.
-
+            mailSender.send(
+                "verification",
+                subscription,
+                new HashMap<>()
+            );
         }
 
         return new SubscriptionResource(

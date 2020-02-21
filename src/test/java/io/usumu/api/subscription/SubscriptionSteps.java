@@ -9,12 +9,15 @@ import io.usumu.api.subscription.controller.SubscriptionVerifyRequest;
 import io.usumu.api.subscription.entity.SubscriptionMethod;
 import io.usumu.api.subscription.entity.SubscriptionStatus;
 import io.usumu.api.variable.VariableStorage;
+import kong.unirest.HttpResponse;
 import kong.unirest.JsonNode;
 import kong.unirest.Unirest;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+
+import static org.junit.Assert.assertEquals;
 
 @SpringBootTest(
     properties = {
@@ -24,7 +27,8 @@ import java.net.URLEncoder;
         "USUMU_S3_REGION=us-west-2",
         "USUMU_S3_BUCKET=subscriptions",
         "USUMU_S3_ACCESS_KEY_ID=asdf",
-        "USUMU_S3_SECRET_ACCESS_KEY=asdf"
+        "USUMU_S3_SECRET_ACCESS_KEY=asdf",
+        "USUMU_SMTP_PORT=2525"
     },
     webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT
 )
@@ -35,6 +39,21 @@ public class SubscriptionSteps {
     public SubscriptionSteps(final LastResponseStorage responseStorage, final VariableStorage variableStorage) {
         this.responseStorage = responseStorage;
         this.variableStorage = variableStorage;
+    }
+
+    @Given("^I uploaded a template \"([^\"]+)\" with the content(?:|,|\\.|:)$")
+    public void createTemplate(
+        String templateName,
+        String body
+    ) {
+        final HttpResponse response = Unirest
+            .put("http://127.0.0.1:8080/templates/" + templateName.replaceAll("^/", ""))
+            .header("Content-Type", "text/plain")
+            .accept("text/plain")
+            .body(body)
+            .asEmpty();
+
+        assertEquals(200, response.getStatus());
     }
 
     @Given("^I created a subscriber with the method \"([^\"]*)\" and the value \"([^\"]*)\"(?:|,|\\.)$")

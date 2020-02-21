@@ -1,4 +1,27 @@
 Feature: Subscriber management
+  Background:
+    Given I uploaded a template "verification/body.html" with the content
+    """
+    <a href="http://example.com/verification/{{ subscription.verificationCode }}">Verify</a>
+    """
+    And I uploaded a template "verification/subject.txt" with the content
+    """
+    Verify your subscription
+    """
+    And I uploaded a template "verification/fromEmail.txt" with the content
+    """
+    newsletter@example.com
+    """
+    And I uploaded a template "verification/fromName.txt" with the content
+    """
+    Newsletter
+    """
+    And I uploaded a template "verification/toEmail.txt" with the content
+    """
+    {{ subscription.value }}
+    """
+
+
   Scenario: Creating a new subscription with a valid e-mail address.
     When I create a subscriber with the method "EMAIL" and the value "test1@example.com"
     Then the last call should succeed.
@@ -22,26 +45,6 @@ Feature: Subscriber management
     And the subscription in the last response should have the status "UNCONFIRMED".
 
   Scenario: Creating a subscription should send a verification e-mail.
-    Given I uploaded a template "verification/body.html" with the content
-    """
-    <a href="http://example.com/verification/{{ subscription.verificationCode }}">Verify</a>
-    """
-    And I uploaded a template "verification/subject.txt" with the content
-    """
-    Verify your subscription
-    """
-    And I uploaded a template "verification/fromEmail.txt" with the content
-    """
-    newsletter@example.com
-    """
-    And I uploaded a template "verification/fromName.txt" with the content
-    """
-    Newsletter
-    """
-    And I uploaded a template "verification/toEmail.txt" with the content
-    """
-    {{ subscription.value }}
-    """
     When I create a subscriber with the method "EMAIL" and the value "test5@example.com"
     Then I should receive an e-mail to "test5@example.com",
     And the last e-mail to "test5@example.com" should contain a link to "http://example.com/verification/([^/]*)".
