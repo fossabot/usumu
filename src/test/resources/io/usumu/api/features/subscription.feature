@@ -11,7 +11,7 @@ Feature: Subscriber management
     When I create a subscriber with the method "EMAIL" and the value "test3@example.com"
     Then the last call should succeed,
     And the last call should return a subscription,
-    And the subscription in the last response should have the method "EMAIL" and the value "test3@example.com",
+    And the subscription in the last response should not have a value,
     And the subscription in the last response should have the status "UNCONFIRMED".
 
   Scenario: Fetching a created subscription should return a subscription object.
@@ -22,6 +22,26 @@ Feature: Subscriber management
     And the subscription in the last response should have the status "UNCONFIRMED".
 
   Scenario: Creating a subscription should send a verification e-mail.
+    Given I uploaded a template "verification/body.html" with the content
+    """
+    <a href="http://example.com/verification/{{ subscription.verificationCode }}">Verify</a>
+    """
+    And I uploaded a template "verification/subject.txt" with the content
+    """
+    Verify your subscription
+    """
+    And I uploaded a template "verification/fromEmail.txt" with the content
+    """
+    newsletter@example.com
+    """
+    And I uploaded a template "verification/fromName.txt" with the content
+    """
+    Newsletter
+    """
+    And I uploaded a template "verification/toEmail.txt" with the content
+    """
+    {{ subscription.value }}
+    """
     When I create a subscriber with the method "EMAIL" and the value "test5@example.com"
     Then I should receive an e-mail to "test5@example.com",
     And the last e-mail to "test5@example.com" should contain a link to "http://example.com/verification/([^/]*)".
@@ -37,10 +57,8 @@ Feature: Subscriber management
     And the subscription in the last response should have the status "CONFIRMED".
 
   Scenario: Deleting a subscription should result in a deleted subscriber returned.
-    Given I created a subscriber with the method "EMAIL" and the value "test7@example.com",
-    And I stored the last response field "verificationCode" in the variable "verificationCode",
+    Given I imported a subscriber with the method "EMAIL" and the value "test7@example.com" with status "CONFIRMED",
     And I stored the last response field "id" in the variable "subscriptionId",
-    And I confirm the subscription "${subscriptionId}" with the code "${verificationCode}"
     When I delete the subscription "${subscriptionId}"
     Then the last call should succeed,
     And the last call should return a subscription,

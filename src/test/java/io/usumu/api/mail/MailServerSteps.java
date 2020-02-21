@@ -11,16 +11,12 @@ import org.springframework.lang.Nullable;
 import javax.mail.BodyPart;
 import javax.mail.MessagingException;
 import javax.mail.Part;
-import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import java.io.IOException;
-import java.util.Collection;
-import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static junit.framework.TestCase.assertTrue;
-import static junit.framework.TestCase.fail;
 
 public class MailServerSteps {
     private final MailStorage mailStorage;
@@ -47,18 +43,21 @@ public class MailServerSteps {
     @When("^I receive an e-mail to \"([^\"]*)\"(?:|,|\\.)$")
     @Then("^I should receive an e-mail to \"([^\"]*)\"(?:|,|\\.)$")
     public void shouldReceiveEmail(String email) {
-        assertTrue(mailStorage.read(email).size() > 0);
+        assertTrue("No e-mail received to " + email, mailStorage.read(email).size() > 0);
     }
 
     @Given("^the last e-mail to \"([^\"]*)\" contained a link to \"([^\"]*)\"(?:|,|\\.)$")
     @When("^the last e-mail to \"([^\"]*)\" contains a link to \"([^\"]*)\"(?:|,|\\.)$")
     @Then("^the last e-mail to \"([^\"]*)\" should contain a link to \"([^\"]*)\"(?:|,|\\.)$")
     public void shouldContainLink(String email, Pattern linkPattern) throws Throwable {
-        assertTrue(mailStorage.read(email).size() > 0);
+        assertTrue("No e-mail received to " + email, mailStorage.read(email).size() > 0);
         final Message lastEmail = mailStorage.read(email)
             .get(mailStorage.read(email)
                      .size() - 1);
-        assertTrue(findLink(linkPattern, lastEmail.message, null, null));
+        assertTrue(
+            "No link found in the last e-mail to " + email + " matching " + linkPattern.toString(),
+            findLink(linkPattern, lastEmail.message, null, null)
+        );
     }
 
     private boolean findLink(Pattern linkPattern, Part message, @Nullable String captureGroup, @Nullable String captureName) throws MessagingException, IOException {

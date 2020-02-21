@@ -1,11 +1,13 @@
 package io.usumu.api.subscription.storage;
 
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.*;
+import com.amazonaws.services.s3.model.ListObjectsV2Result;
+import com.amazonaws.services.s3.model.S3Object;
+import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.usumu.api.common.entity.PaginatedList;
 import io.usumu.api.crypto.GlobalSecret;
 import io.usumu.api.crypto.HashGenerator;
+import io.usumu.api.s3.S3Accessor;
 import io.usumu.api.s3.S3Configuration;
 import io.usumu.api.s3.S3Factory;
 import io.usumu.api.subscription.entity.EncryptedSubscription;
@@ -15,25 +17,28 @@ import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
 public class S3Storage implements SubscriptionStorageUpsert, SubscriptionStorageGet, SubscriptionStorageList {
-
-    private final S3Factory s3Factory;
+    private final S3Accessor      s3Accessor;
+    private final S3Factory       s3Factory;
     private final S3Configuration s3Configuration;
-    private final ObjectMapper objectMapper;
-    private final GlobalSecret globalSecret;
-    private final HashGenerator hashGenerator;
+    private final ObjectMapper    objectMapper;
+    private final GlobalSecret    globalSecret;
+    private final HashGenerator   hashGenerator;
 
     @Autowired
     public S3Storage(
+        final S3Accessor s3Accessor,
         S3Factory s3Factory,
         S3Configuration s3Configuration,
         ObjectMapper objectMapper,
         GlobalSecret globalSecret,
         HashGenerator hashGenerator
     ) {
+        this.s3Accessor = s3Accessor;
         this.s3Factory = s3Factory;
         this.s3Configuration = s3Configuration;
         this.objectMapper = objectMapper;
@@ -46,21 +51,11 @@ public class S3Storage implements SubscriptionStorageUpsert, SubscriptionStorage
         //todo this may leak value to S3 provider. Fix by employing type detection.
         S3Object object;
         try {
-            object = s3Factory
-                .get()
-                .getObject(s3Configuration.bucketName, "s/" + hash);
-        } catch (AmazonS3Exception e) {
-            if (!e.getErrorCode().equalsIgnoreCase("NoSuchKey")) {
-                throw e;
-            }
+            object = s3Accessor.get("s/" + hashGenerator.generateHash(hash));
+        } catch (S3Accessor.ObjectNotFoundException e) {
             try {
-                object = s3Factory
-                    .get()
-                    .getObject(s3Configuration.bucketName, "s/" + hashGenerator.generateHash(hash));
-            } catch (AmazonS3Exception e2) {
-                if (!e2.getErrorCode().equalsIgnoreCase("NoSuchKey")) {
-                    throw e2;
-                }
+                object = s3Accessor.get("s/" + hash);
+            } catch (S3Accessor.ObjectNotFoundException e2) {
                 throw new SubscriptionNotFound();
             }
         }
@@ -79,23 +74,21 @@ public class S3Storage implements SubscriptionStorageUpsert, SubscriptionStorage
         int maxItems,
         String continuationToken
     ) {
-        ListObjectsV2Request request = new ListObjectsV2Request()
-            .withBucketName(s3Configuration.bucketName)
-            .withMaxKeys(maxItems);
-        if (continuationToken != null) {
-            request = request.withContinuationToken(continuationToken);
-        }
-
-        AmazonS3 client = s3Factory.get();
-
-        ListObjectsV2Result listResponse = client.listObjectsV2(request);
+        ListObjectsV2Result listResponse = s3Accessor.list("s/", maxItems, continuationToken);
 
         return new PaginatedList<>(
             listResponse.getContinuationToken(),
             listResponse
                 .getObjectSummaries()
                 .stream()
-                .map(summary -> client.getObject(s3Configuration.bucketName, summary.getKey()).getObjectContent())
+                .map(summary -> {
+                    try {
+                        return s3Accessor.get(summary.getKey()).getObjectContent();
+                    } catch (S3Accessor.ObjectNotFoundException e) {
+                        return null;
+                    }
+                })
+                .filter(Objects::nonNull)
                 .map(bucketContent -> {
                     try {
                         return objectMapper.readValue(bucketContent, EncryptedSubscription.class);
@@ -117,9 +110,6 @@ public class S3Storage implements SubscriptionStorageUpsert, SubscriptionStorage
             throw new RuntimeException(e);
         }
 
-        //todo handle bucket name null
-        s3Factory
-            .get()
-            .putObject(s3Configuration.bucketName, "s/" + encryptedSubscription.hash, outputStream.toString());
+        s3Accessor.put("s/" + encryptedSubscription.hash, outputStream.toString());
     }
 }
