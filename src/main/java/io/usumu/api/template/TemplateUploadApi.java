@@ -1,11 +1,14 @@
 package io.usumu.api.template;
 
 import io.swagger.annotations.ApiOperation;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Nullable;
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
@@ -37,8 +40,7 @@ public class TemplateUploadApi {
         String directory,
         @PathVariable("filename")
         String filename,
-        @RequestBody
-        InputStream body
+        HttpServletRequest request
     ) {
         final String file = directory == null ? filename : directory + "/" + filename;
 
@@ -46,7 +48,7 @@ public class TemplateUploadApi {
         final char[]        buffer     = new char[bufferSize];
         final StringBuilder out = new StringBuilder();
         try {
-            Reader              in  = new InputStreamReader(body, StandardCharsets.UTF_8);
+            Reader              in  = new InputStreamReader(request.getInputStream(), StandardCharsets.UTF_8);
             int                 charsRead;
             while ((charsRead = in.read(buffer, 0, buffer.length)) > 0) {
                 out.append(buffer, 0, charsRead);

@@ -2,7 +2,7 @@ Feature: Logging
   Background:
     Given I uploaded a template "verification/body.html" with the content
     """
-    <a href="http://example.com/verification/{{ subscription.verificationCode }}">Verify</a>
+    <a href="http://example.com/verification/{{ verificationCode }}">Verify</a>
     """
     And I uploaded a template "verification/subject.txt" with the content
     """
@@ -18,7 +18,7 @@ Feature: Logging
     """
     And I uploaded a template "verification/toEmail.txt" with the content
     """
-    {{ subscription.value }}
+    {{ email }}
     """
 
   Scenario: Creating a subscription should produce a log entry

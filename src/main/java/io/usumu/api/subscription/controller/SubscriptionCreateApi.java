@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 import zone.refactor.spring.hateoas.contract.LinkProvider;
 
 import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @Api(
@@ -154,10 +155,14 @@ public class SubscriptionCreateApi {
         }
 
         if (!request.imported && subscription.status == SubscriptionStatus.UNCONFIRMED) {
+            Map<String, Object> data = new HashMap<>();
+            data.put("email", request.value);
+            data.put("verificationCode", subscription.getVerificationCode(hashGenerator));
+            data.put("subscription", subscription);
+
             mailSender.send(
                 "verification",
-                subscription,
-                new HashMap<>()
+                data
             );
         }
 

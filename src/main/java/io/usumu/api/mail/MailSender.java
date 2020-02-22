@@ -1,6 +1,5 @@
 package io.usumu.api.mail;
 
-import io.usumu.api.subscription.entity.Subscription;
 import io.usumu.api.template.TemplateEngine;
 import io.usumu.api.template.TemplateProvider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +11,6 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import java.io.UnsupportedEncodingException;
-import java.util.HashMap;
 import java.util.Map;
 
 @Service
@@ -29,33 +27,31 @@ public class MailSender {
         this.mailConfiguration = mailConfiguration;
     }
 
-    public void send(String template, Subscription subscription, Map<String, Object> data)
+    public void send(String template, Map<String, Object> data)
         throws TemplateProvider.TemplateNotFound {
-        Map<String, Object> finalData = new HashMap<>(data);
-        finalData.put("subscription", subscription);
         String bodyText = null;
         try {
-            bodyText = templateEngine.render(template + "/body.text", finalData);
+            bodyText = templateEngine.render(template + "/body.text", data);
         } catch (TemplateProvider.TemplateNotFound e) {
         }
         String bodyHtml = null;
         try {
-            bodyHtml = templateEngine.render(template + "/body.html", finalData);
+            bodyHtml = templateEngine.render(template + "/body.html", data);
         } catch (TemplateProvider.TemplateNotFound e) {
         }
-        final String subject = templateEngine.render(template + "/subject.txt", finalData);
+        final String subject = templateEngine.render(template + "/subject.txt", data);
         String fromName = null;
         try {
-            fromName = templateEngine.render(template + "/fromName.txt", finalData);
+            fromName = templateEngine.render(template + "/fromName.txt", data);
         } catch (TemplateProvider.TemplateNotFound e) {
         }
-        final String fromEmail = templateEngine.render(template + "/fromEmail.txt", finalData);
+        final String fromEmail = templateEngine.render(template + "/fromEmail.txt", data);
         String toName = null;
         try {
-            toName = templateEngine.render(template + "/toName.txt", finalData);
+            toName = templateEngine.render(template + "/toName.txt", data);
         } catch (TemplateProvider.TemplateNotFound e) {
         }
-        final String toEmail = templateEngine.render(template + "/toEmail.txt", finalData);
+        final String toEmail = templateEngine.render(template + "/toEmail.txt", data);
 
         System.out.println("SimpleEmail Start");
 

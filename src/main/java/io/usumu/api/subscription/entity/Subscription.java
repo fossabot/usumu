@@ -9,7 +9,6 @@ import io.usumu.api.crypto.SecretGenerator;
 import io.usumu.api.subscription.exception.VerificationFailed;
 import org.springframework.lang.Nullable;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -95,7 +94,7 @@ public class Subscription {
             this.value = null;
         }
         this.status = importStatus;
-        if (importStatus == SubscriptionStatus.UNSUBSCRIBED) {
+        if (importStatus == SubscriptionStatus.UNCONFIRMED || importStatus == null) {
             this.secret = secretGenerator.get();
         } else {
             this.secret = null;

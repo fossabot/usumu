@@ -50,16 +50,28 @@ public class MailConfiguration {
 
     public Properties getMailProperties() {
         Properties props = new Properties();
-        props.put("mail.smtp.host", smtpServer);
-        props.put("mail.smtp.port", port);
-        props.put("mail.smtp.auth", auth);
-        props.put("mail.smtp.starttls.enable", startTls);
-        props.put("mail.smtp.localhost", heloHostname);
+        if (smtpServer != null && !smtpServer.isEmpty()) {
+            props.put("mail.smtp.host", smtpServer);
+        }
+        if (port != 25) {
+            props.put("mail.smtp.port", port);
+        }
+        if (auth) {
+            props.put("mail.smtp.auth", "true");
+        }
+        if (startTls) {
+            props.put("mail.smtp.starttls.enable", "true");
+        } else {
+            props.put("mail.smtp.starttls.enable", "false");
+        }
+        if (heloHostname != null && !heloHostname.isEmpty()) {
+            props.put("mail.smtp.localhost", heloHostname);
+        }
         return props;
     }
 
     public Authenticator getAuthenticator() {
-        if (auth && user != null && password != null) {
+        if (auth && user != null && password != null && !user.isEmpty() && !password.isEmpty()) {
             return new Authenticator() {
                 @Override
                 protected PasswordAuthentication getPasswordAuthentication() {
