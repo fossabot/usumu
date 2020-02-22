@@ -14,7 +14,7 @@ public class MailConfiguration {
     public final String smtpServer;
     public final int port;
     public final boolean auth;
-    public final boolean startTls;
+    public final boolean ssl;
     public final String user;
     public final String password;
     public final String heloHostname;
@@ -27,8 +27,8 @@ public class MailConfiguration {
         final int port,
         @Value(("${USUMU_SMTP_AUTH:0}"))
         final boolean auth,
-        @Value(("${USUMU_SMTP_STARTTLS:0}"))
-        final boolean startTls,
+        @Value(("${USUMU_SMTP_SSL:0}"))
+        final boolean ssl,
         @Nullable
         @Value(("${USUMU_SMTP_USER:}"))
         final String user,
@@ -42,7 +42,7 @@ public class MailConfiguration {
         this.smtpServer = smtpServer;
         this.port = port;
         this.auth = auth;
-        this.startTls = startTls;
+        this.ssl = ssl;
         this.user = user;
         this.password = password;
         this.heloHostname = heloHostname;
@@ -59,8 +59,10 @@ public class MailConfiguration {
         if (auth) {
             props.put("mail.smtp.auth", "true");
         }
-        if (startTls) {
-            props.put("mail.smtp.starttls.enable", "true");
+        props.put("mail.smtp.starttls.enable", "true");
+        if (ssl) {
+            props.put("mail.smtp.socketFactory.port", port);
+            props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
         }
         if (heloHostname != null && !heloHostname.isEmpty()) {
             props.put("mail.smtp.localhost", heloHostname);

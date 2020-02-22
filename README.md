@@ -32,6 +32,13 @@ Usumu can be configured using environment variables:
 - `USUMU_S3_REGION`: The region to create the bucket in if it does not exist. If empty, the default AWS region will be used.
 - `USUMU_S3_BUCKET`: The name of the S3 bucket to be used or created.
 - `USUMU_S3_BUCKET_HOST`: A string for finding the S3 endpoint. `%s` can be used to insert the region. If empty, AWS will be used.
+- `USUMU_SMTP_SERVER`: The SMTP server to use for mail sending
+- `USUMU_SMTP_PORT`: The SMTP port to use
+- `USUMU_SMTP_AUTH`: Set to 1 to use SMTP authentication
+- `USUMU_SMTP_SSL`: Enable on-connect SSL connection (StartTLS is enabled by default)
+- `USUMU_SMTP_USER`: User to use for SMTP connection
+- `USUMU_SMTP_PASSWORD`: Password to use for SMTP authentication
+- `USUMU_SMTP_HELO_HOSTNAME`: Hostname to send to the remote server in HELO/EHLO.
 
 By default, Usumu will listen on port 8080.
 
