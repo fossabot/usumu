@@ -49,7 +49,8 @@ public class MailServerSteps {
     @Given("^the last e-mail to \"([^\"]*)\" contained a link to \"([^\"]*)\"(?:|,|\\.)$")
     @When("^the last e-mail to \"([^\"]*)\" contains a link to \"([^\"]*)\"(?:|,|\\.)$")
     @Then("^the last e-mail to \"([^\"]*)\" should contain a link to \"([^\"]*)\"(?:|,|\\.)$")
-    public void shouldContainLink(String email, Pattern linkPattern) throws Throwable {
+    public void shouldContainLink(String email, String linkPatternString) throws Throwable {
+        Pattern linkPattern = Pattern.compile(linkPatternString);
         assertTrue("No e-mail received to " + email, mailStorage.read(email).size() > 0);
         final Message lastEmail = mailStorage.read(email)
             .get(mailStorage.read(email)

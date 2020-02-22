@@ -61,17 +61,20 @@ public class MailSender {
         );
 
         try {
-            Message   mimeMessage   = new MimeMessage(session);
+            MimeMessage mimeMessage   = new MimeMessage(session);
             Multipart multiPart = new MimeMultipart("alternative");
             if (bodyHtml != null) {
                 MimeBodyPart htmlPart = new MimeBodyPart();
-                htmlPart.setContent(htmlPart, "text/html; charset=utf-8");
+                htmlPart.setContent(bodyHtml, "text/html; charset=utf-8");
                 multiPart.addBodyPart(htmlPart);
             }
             if (bodyText != null) {
                 MimeBodyPart textPart = new MimeBodyPart();
-                textPart.setText(bodyText, "utf-8");
+                textPart.setContent(bodyText, "text/plain; charset=utf-8");
                 multiPart.addBodyPart(textPart);
+            }
+            if (multiPart.getCount() == 0) {
+                throw new RuntimeException("No body parts.");
             }
             mimeMessage.setContent(multiPart);
 
@@ -86,7 +89,7 @@ public class MailSender {
             } else {
                 mimeMessage.setRecipient(Message.RecipientType.TO, new InternetAddress(toEmail));
             }
-            mimeMessage.setSubject(subject);
+            mimeMessage.setSubject(subject, "utf-8");
 
             Transport.send(mimeMessage);
         } catch (UnsupportedEncodingException | MessagingException e) {

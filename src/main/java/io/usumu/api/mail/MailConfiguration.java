@@ -36,7 +36,7 @@ public class MailConfiguration {
         @Value(("${USUMU_SMTP_PASSWORD:}"))
         final String password,
         @Nullable
-        @Value(("${USUMU_SMTP_HELO_HOSTNAME:localhost}"))
+        @Value(("${USUMU_SMTP_HELO_HOSTNAME:}"))
         final String heloHostname
     ) {
         this.smtpServer = smtpServer;
@@ -61,8 +61,6 @@ public class MailConfiguration {
         }
         if (startTls) {
             props.put("mail.smtp.starttls.enable", "true");
-        } else {
-            props.put("mail.smtp.starttls.enable", "false");
         }
         if (heloHostname != null && !heloHostname.isEmpty()) {
             props.put("mail.smtp.localhost", heloHostname);
