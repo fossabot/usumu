@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import io.usumu.api.common.resource.LinkedResource;
-import io.usumu.api.log.resource.SubscriptionLogEntryResource;
+import io.usumu.api.log.resource.LogEntryResource;
 import io.usumu.api.subscription.entity.Subscription;
 import io.usumu.api.subscription.entity.SubscriptionMethod;
 import io.usumu.api.subscription.entity.SubscriptionStatus;
@@ -25,7 +25,7 @@ public class SubscriptionResource extends LinkedResource<SubscriptionResourceLin
     @ApiModelProperty(value = "method", required = true, notes = "The subscription method (EMAIL or SMS)")
     @JsonProperty(value = "method", required = true)
     public final SubscriptionMethod method;
-    @SuppressWarnings("WeakerAccess")
+    @SuppressWarnings({"WeakerAccess", "DefaultAnnotationParam"})
 
     @Nullable
     @ApiModelProperty(
@@ -33,7 +33,10 @@ public class SubscriptionResource extends LinkedResource<SubscriptionResourceLin
         required = false,
         notes = "The actual e-mail address or phone number of the subscriber. Only available if the status is SUBSCRIBED."
     )
-    @JsonProperty(value = "value", required = false)
+    @JsonProperty(
+        value = "value",
+        required = false
+    )
     public final String             value;
 
     @SuppressWarnings("WeakerAccess")
@@ -49,7 +52,7 @@ public class SubscriptionResource extends LinkedResource<SubscriptionResourceLin
             subscription,
             linkProvider.getResourceListLink(SubscriptionResource.class),
             linkProvider.getResourceLink(SubscriptionResource.class, subscription.id),
-            linkProvider.getResourceListLink(SubscriptionLogEntryResource.class, subscription.id)
+            linkProvider.getResourceListLink(LogEntryResource.class, subscription.id)
         );
     }
 

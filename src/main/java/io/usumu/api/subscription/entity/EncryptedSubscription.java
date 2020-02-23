@@ -2,30 +2,22 @@ package io.usumu.api.subscription.entity;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.usumu.api.common.entity.EncryptedEntity;
 import io.usumu.api.crypto.EntityCrypto;
+import io.usumu.api.log.entity.LogEntry;
 
-public class EncryptedSubscription {
-    @JsonProperty("hash")
-    public final String hash;
-    @JsonProperty("encryptedData")
-    public final String encryptedData;
-
-    public EncryptedSubscription(
-            Subscription subscription,
-            EntityCrypto entityCrypto
-    ) {
-        hash = subscription.id;
-        encryptedData = entityCrypto.encrypt(subscription);
+public class EncryptedSubscription extends EncryptedEntity<Subscription> {
+    public EncryptedSubscription(Subscription subscription, EntityCrypto entityCrypto) {
+        super(subscription.id, subscription, entityCrypto);
     }
 
     @JsonCreator
     public EncryptedSubscription(
-        @JsonProperty("hash")
-            String hash,
-        @JsonProperty("encryptedData")
+            @JsonProperty("hash")
+            String hash,    
+            @JsonProperty("encryptedData")
             String encryptedData
     ) {
-        this.hash = hash;
-        this.encryptedData = encryptedData;
+        super(hash, encryptedData);
     }
 }

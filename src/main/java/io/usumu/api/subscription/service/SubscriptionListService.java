@@ -44,9 +44,9 @@ public class SubscriptionListService {
                     }
                 })
                 .collect(Collectors.toList());
-        return new PaginatedList<Subscription>(
-                encryptedSubscriptions.continuationToken,
-                subscriptions
+        return new PaginatedList<>(
+            encryptedSubscriptions.continuationToken,
+            subscriptions
         );
     }
 }
