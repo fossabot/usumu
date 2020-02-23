@@ -1,11 +1,10 @@
 package io.usumu.api.s3;
 
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.AmazonS3Exception;
-import com.amazonaws.services.s3.model.ListObjectsV2Request;
-import com.amazonaws.services.s3.model.ListObjectsV2Result;
-import com.amazonaws.services.s3.model.S3Object;
+import com.amazonaws.services.s3.model.*;
 import org.springframework.stereotype.Service;
+
+import java.io.InputStream;
 
 @Service
 public class S3Accessor {
@@ -33,11 +32,11 @@ public class S3Accessor {
 
     public final void put(
         String key,
-        String data
+        InputStream data
     ) {
         s3Factory
             .get()
-            .putObject(s3Configuration.bucketName, key, data);
+            .putObject(s3Configuration.bucketName, key, data, new ObjectMetadata());
     }
 
     public final ListObjectsV2Result list(

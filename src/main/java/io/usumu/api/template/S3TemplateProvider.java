@@ -4,6 +4,7 @@ import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import io.usumu.api.s3.S3Accessor;
 import org.springframework.stereotype.Service;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -40,6 +41,6 @@ public class S3TemplateProvider implements TemplateProvider {
 
     @Override
     public void save(final String file, final String content) {
-        s3Accessor.put("t/" + file, content);
+        s3Accessor.put("t/" + file, new ByteArrayInputStream(content.getBytes()));
     }
 }

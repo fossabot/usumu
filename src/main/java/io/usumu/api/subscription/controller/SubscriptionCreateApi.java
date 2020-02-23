@@ -19,6 +19,8 @@ import io.usumu.api.subscription.resource.SubscriptionResource;
 import io.usumu.api.subscription.storage.SubscriptionStorageGet;
 import io.usumu.api.subscription.storage.SubscriptionStorageUpsert;
 import io.usumu.api.template.TemplateProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -35,25 +37,26 @@ import java.util.Map;
 )
 @RequestMapping("/subscriptions")
 public class SubscriptionCreateApi {
-    private final SubscriptionStorageGet    subscriptionStorageGet;
+    private final SubscriptionStorageGet subscriptionStorageGet;
     private final SubscriptionStorageUpsert subscriptionStorageUpsert;
-    private final EntityCrypto              entityCrypto;
+    private final EntityCrypto entityCrypto;
     private final LinkProvider linkProvider;
     private final GlobalSecret globalSecret;
     private final SecretGenerator secretGenerator;
-    private final HashGenerator             hashGenerator;
-    private final MailSender                mailSender;
+    private final HashGenerator hashGenerator;
+    private final MailSender mailSender;
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
     public SubscriptionCreateApi(
-        SubscriptionStorageGet subscriptionStorageGet,
-        SubscriptionStorageUpsert subscriptionStorageUpsert,
-        EntityCrypto entityCrypto,
-        LinkProvider linkProvider,
-        GlobalSecret globalSecret,
-        SecretGenerator secretGenerator,
-        HashGenerator hashGenerator,
-        final MailSender mailSender
+            SubscriptionStorageGet subscriptionStorageGet,
+            SubscriptionStorageUpsert subscriptionStorageUpsert,
+            EntityCrypto entityCrypto,
+            LinkProvider linkProvider,
+            GlobalSecret globalSecret,
+            SecretGenerator secretGenerator,
+            HashGenerator hashGenerator,
+            final MailSender mailSender
     ) {
         this.subscriptionStorageGet = subscriptionStorageGet;
         this.subscriptionStorageUpsert = subscriptionStorageUpsert;
@@ -66,42 +69,42 @@ public class SubscriptionCreateApi {
     }
 
     @ApiOperation(
-        nickname = "createSubscription",
-        value = "Create a subscription",
-        notes = "Create a subscription by providing the subscription entryType (EMAIL or SMS) and the contact details." +
-                "The value in this case is either the phone number in international format (+123456789), or the e-mail address." +
-                "When the subscription is created a confirmation message is sent to the user to confirm their" +
-                "subscription.",
-        consumes = "application/json",
-        produces = "application/json"
+            nickname = "createSubscription",
+            value = "Create a subscription",
+            notes = "Create a subscription by providing the subscription entryType (EMAIL or SMS) and the contact details." +
+                    "The value in this case is either the phone number in international format (+123456789), or the e-mail address." +
+                    "When the subscription is created a confirmation message is sent to the user to confirm their" +
+                    "subscription.",
+            consumes = "application/json",
+            produces = "application/json"
     )
     @ApiResponses(
             value = {
                     @ApiResponse(
-                        code = 200,
-                        message = "Created the subscription",
-                        response = SubscriptionResource.class
+                            code = 200,
+                            message = "Created the subscription",
+                            response = SubscriptionResource.class
                     ),
                     @ApiResponse(
-                        code = 400,
-                        message = "When the given value is invalid for the given entryType",
-                        response = InvalidParameters.class
+                            code = 400,
+                            message = "When the given value is invalid for the given entryType",
+                            response = InvalidParameters.class
                     ),
                     @ApiResponse(
-                        code = 409,
-                        message = "When the given subscription already exists",
-                        response = SubscriptionAlreadyExists.class
+                            code = 409,
+                            message = "When the given subscription already exists",
+                            response = SubscriptionAlreadyExists.class
                     )
             }
     )
     @RequestMapping(
-        method = RequestMethod.POST,
-        consumes = "application/json",
-        produces = "application/json"
+            method = RequestMethod.POST,
+            consumes = "application/json",
+            produces = "application/json"
     )
     public SubscriptionResource create(
-        @RequestBody
-        SubscriptionCreateRequest request
+            @RequestBody
+                    SubscriptionCreateRequest request
     ) throws SubscriptionAlreadyExists, InvalidParameters, TemplateProvider.TemplateNotFound {
         //todo race condition possible
         Subscription subscription;
@@ -112,8 +115,8 @@ public class SubscriptionCreateApi {
             subscription = entityCrypto.decrypt(encryptedSubscription.encryptedData, Subscription.class);
 
             if (
-                subscription.status != SubscriptionStatus.UNCONFIRMED &&
-                subscription.status != SubscriptionStatus.UNSUBSCRIBED
+                    subscription.status != SubscriptionStatus.UNCONFIRMED &&
+                            subscription.status != SubscriptionStatus.UNSUBSCRIBED
             ) {
                 //Already subscribed and confirmed
                 throw new SubscriptionAlreadyExists();
@@ -121,7 +124,7 @@ public class SubscriptionCreateApi {
                 //Resubscribe
                 subscription = subscription.withSubscribeInitiated(request.value, globalSecret);
                 encryptedSubscription = new EncryptedSubscription(
-                    subscription, entityCrypto
+                        subscription, entityCrypto
                 );
                 subscriptionStorageUpsert.store(encryptedSubscription);
             }
@@ -130,25 +133,25 @@ public class SubscriptionCreateApi {
             if (request.imported) {
                 //Create new subscription w. status
                 subscription = new Subscription(
-                    request.method,
-                    request.value,
-                    request.importStatus,
-                    hashGenerator,
-                    secretGenerator
+                        request.method,
+                        request.value,
+                        request.importStatus,
+                        hashGenerator,
+                        secretGenerator
                 );
             } else {
                 //Create new subscription
                 subscription = new Subscription(
-                    request.method,
-                    request.value,
-                    hashGenerator,
-                    secretGenerator
+                        request.method,
+                        request.value,
+                        hashGenerator,
+                        secretGenerator
                 );
             }
 
             encryptedSubscription = new EncryptedSubscription(
-                subscription,
-                entityCrypto
+                    subscription,
+                    entityCrypto
             );
 
             subscriptionStorageUpsert.store(encryptedSubscription);
@@ -156,19 +159,19 @@ public class SubscriptionCreateApi {
 
         if (!request.imported && subscription.status == SubscriptionStatus.UNCONFIRMED) {
             Map<String, Object> data = new HashMap<>();
-            data.put("email", request.value);
+            data.put("value", request.value);
             data.put("verificationCode", subscription.getVerificationCode(hashGenerator));
             data.put("subscription", subscription);
 
             mailSender.send(
-                "verification",
-                data
+                    "verification",
+                    data
             );
         }
 
         return new SubscriptionResource(
-            subscription,
-            linkProvider
+                subscription,
+                linkProvider
         );
     }
 }

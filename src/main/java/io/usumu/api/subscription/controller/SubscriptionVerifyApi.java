@@ -13,6 +13,8 @@ import io.usumu.api.subscription.resource.SubscriptionResource;
 import io.usumu.api.subscription.storage.SubscriptionStorageGet;
 import io.usumu.api.subscription.storage.SubscriptionStorageList;
 import io.usumu.api.subscription.storage.SubscriptionStorageUpsert;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import zone.refactor.spring.hateoas.contract.LinkProvider;
@@ -23,32 +25,27 @@ import zone.refactor.spring.hateoas.contract.LinkProvider;
 )
 @RequestMapping("/subscriptions")
 public class SubscriptionVerifyApi {
-    private final SubscriptionStorageList subscriptionStorageList;
     private final SubscriptionStorageGet subscriptionStorageGet;
     private final SubscriptionStorageUpsert subscriptionStorageUpsert;
     private final EntityCrypto entityCrypto;
     private final LinkProvider linkProvider;
-    private final GlobalSecret globalSecret;
     private final SecretGenerator secretGenerator;
     private final HashGenerator hashGenerator;
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
     public SubscriptionVerifyApi(
-        SubscriptionStorageList subscriptionStorageList,
         SubscriptionStorageGet subscriptionStorageGet,
         SubscriptionStorageUpsert subscriptionStorageUpsert,
         EntityCrypto entityCrypto,
         LinkProvider linkProvider,
-        GlobalSecret globalSecret,
         SecretGenerator secretGenerator,
         HashGenerator hashGenerator
     ) {
-        this.subscriptionStorageList = subscriptionStorageList;
         this.subscriptionStorageGet = subscriptionStorageGet;
         this.subscriptionStorageUpsert = subscriptionStorageUpsert;
         this.entityCrypto = entityCrypto;
         this.linkProvider = linkProvider;
-        this.globalSecret = globalSecret;
         this.secretGenerator = secretGenerator;
         this.hashGenerator = hashGenerator;
     }

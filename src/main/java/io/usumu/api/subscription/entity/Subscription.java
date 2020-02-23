@@ -1,6 +1,7 @@
 package io.usumu.api.subscription.entity;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.usumu.api.common.validation.*;
 import io.usumu.api.crypto.GlobalSecret;
@@ -17,28 +18,45 @@ public class Subscription {
      * Public ID of this subscription.
      */
     @SuppressWarnings("WeakerAccess")
+    @JsonProperty("id")
     public final String id;
     /**
      * The entryType (EMAIL or SMS) of the subscriber
      */
     @SuppressWarnings("WeakerAccess")
+    @JsonProperty("method")
     public final SubscriptionMethod method;
     /**
      * The e-mail address or phone number of the subscriber.
      */
     @Nullable
     @SuppressWarnings("WeakerAccess")
+    @JsonProperty("value")
     public final String value;
     /**
      * Subscription status.
      */
     @SuppressWarnings("WeakerAccess")
+    @JsonProperty("status")
     public final SubscriptionStatus status;
     /**
      * Secret used for generating verification codes.
      */
     @SuppressWarnings("WeakerAccess")
+    @JsonIgnore
     public final byte[] secret;
+
+    @JsonProperty("secret")
+    public String getSecretAsHex() {
+        final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
+        char[] hexChars = new char[secret.length * 2];
+        for (int j = 0; j < secret.length; j++) {
+            int v = secret[j] & 0xFF;
+            hexChars[j * 2] = HEX_ARRAY[v >>> 4];
+            hexChars[j * 2 + 1] = HEX_ARRAY[v & 0x0F];
+        }
+        return new String(hexChars);
+    }
 
     public Subscription(
             SubscriptionMethod method,
@@ -101,25 +119,47 @@ public class Subscription {
         }
     }
 
-
-    @JsonCreator
     public Subscription(
-        @JsonProperty("id")
-            String id,
-            @JsonProperty("method")
-            SubscriptionMethod method,
-            @Nullable
-            @JsonProperty("value")
-            String value,
-            @JsonProperty("status")
-            SubscriptionStatus status,
-            @JsonProperty("secret")
-            byte[] secret
+        String id,
+        SubscriptionMethod method,
+        @Nullable
+        String value,
+        SubscriptionStatus status,
+        byte[] secret
     ) {
         this.id = id;
         this.method = method;
         this.value = value;
         this.status = status;
+        this.secret = secret;
+    }
+
+
+    @JsonCreator
+    public Subscription(
+            @JsonProperty("id")
+                    String id,
+            @JsonProperty("method")
+                    SubscriptionMethod method,
+            @Nullable
+            @JsonProperty("value")
+                    String value,
+            @JsonProperty("status")
+                    SubscriptionStatus status,
+            @JsonProperty("secret")
+                    String secretHex
+    ) {
+        this.id = id;
+        this.method = method;
+        this.value = value;
+        this.status = status;
+
+        int len = secretHex.length();
+        byte[] secret = new byte[len / 2];
+        for (int i = 0; i < len; i += 2) {
+            secret[i / 2] = (byte) ((Character.digit(secretHex.charAt(i), 16) << 4)
+                    + Character.digit(secretHex.charAt(i+1), 16));
+        }
         this.secret = secret;
     }
 

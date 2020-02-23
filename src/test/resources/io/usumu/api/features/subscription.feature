@@ -2,7 +2,7 @@ Feature: Subscriber management
   Background:
     Given I uploaded a template "verification/body.html" with the content
     """
-    <a href="http://example.com/verification/{{ verificationCode }}">Verify</a>
+    <a href="http://example.com/subscriptions/{{ value }}?verificationCode={{ verificationCode }}">Verify</a>
     """
     And I uploaded a template "verification/subject.txt" with the content
     """
@@ -18,7 +18,7 @@ Feature: Subscriber management
     """
     And I uploaded a template "verification/toEmail.txt" with the content
     """
-    {{ email }}
+    {{ value }}
     """
 
 
@@ -47,13 +47,13 @@ Feature: Subscriber management
   Scenario: Creating a subscription should send a verification e-mail.
     When I create a subscriber with the method "EMAIL" and the value "test5@example.com"
     Then I should receive an e-mail to "test5@example.com",
-    And the last e-mail to "test5@example.com" should contain a link to "http://example.com/verification/([^/]*)".
+    And the last e-mail to "test5@example.com" should contain a link to "http://example.com/subscriptions/test5@example.com\?verificationCode=([^/]*)".
 
   Scenario: Confirming a subscription should yield in a subscription being confirmed.
     Given I created a subscriber with the method "EMAIL" and the value "test6@example.com",
     And I stored the last response field "id" in the variable "subscriptionId",
-    And I extract the link to "http://example.com/verification/([^/]*)" from the last e-mail to "test5@example.com" into the variable "verificationLink",
-    And I extract the regexp "http://example.com/verification/([^/]*)" group "1" the variable "verificationLink" into the variable "verificationCode",
+    And I extract the link to "http://example.com/subscriptions/test6@example.com\?verificationCode=([^/]*)" from the last e-mail to "test6@example.com" into the variable "verificationLink",
+    And I extract the regexp ".*verificationCode=(.*)" group "1" the variable "verificationLink" into the variable "verificationCode",
     When I confirm the subscription "${subscriptionId}" with the code "${verificationCode}",
     Then the last call should succeed,
     And the last call should return a subscription,

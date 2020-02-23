@@ -20,8 +20,8 @@ public class GlobalSecret {
     ) {
         this.initVector = initVector;
         Objects.requireNonNull(globalSecret);
-        if (globalSecret.length < 32) {
-            throw new RuntimeException("The USUMU_SECRET variable must be at least 32 bytes long!");
+        if (globalSecret.length != 32) {
+            throw new RuntimeException("The USUMU_SECRET variable must be 32 bytes long!");
         }
         this.secret = globalSecret;
     }

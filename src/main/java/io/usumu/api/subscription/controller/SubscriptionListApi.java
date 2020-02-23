@@ -9,6 +9,8 @@ import io.usumu.api.subscription.entity.Subscription;
 import io.usumu.api.subscription.exception.DecryptionFailed;
 import io.usumu.api.subscription.resource.SubscriptionResource;
 import io.usumu.api.subscription.storage.SubscriptionStorageList;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,6 +33,7 @@ public class SubscriptionListApi {
     private final EntityCrypto entityCrypto;
     private final LinkProvider linkProvider;
     private final HashGenerator hashGenerator;
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
     public SubscriptionListApi(

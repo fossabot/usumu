@@ -15,6 +15,7 @@ import io.usumu.api.subscription.exception.SubscriptionNotFound;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Objects;
@@ -110,6 +111,6 @@ public class S3Storage implements SubscriptionStorageUpsert, SubscriptionStorage
             throw new RuntimeException(e);
         }
 
-        s3Accessor.put("s/" + encryptedSubscription.hash, outputStream.toString());
+        s3Accessor.put("s/" + encryptedSubscription.hash, new ByteArrayInputStream(outputStream.toByteArray()));
     }
 }

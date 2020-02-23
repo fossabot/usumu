@@ -31,7 +31,7 @@ public class MailSender {
         throws TemplateProvider.TemplateNotFound {
         String bodyText = null;
         try {
-            bodyText = templateEngine.render(template + "/body.text", data);
+            bodyText = templateEngine.render(template + "/body.txt", data);
         } catch (TemplateProvider.TemplateNotFound e) {
         }
         String bodyHtml = null;
@@ -52,8 +52,6 @@ public class MailSender {
         } catch (TemplateProvider.TemplateNotFound e) {
         }
         final String toEmail = templateEngine.render(template + "/toEmail.txt", data);
-
-        System.out.println("SimpleEmail Start");
 
         Session session = Session.getInstance(
             mailConfiguration.getMailProperties(),

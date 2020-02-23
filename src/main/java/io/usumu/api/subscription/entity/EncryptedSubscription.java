@@ -5,7 +5,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.usumu.api.crypto.EntityCrypto;
 
 public class EncryptedSubscription {
+    @JsonProperty("hash")
     public final String hash;
+    @JsonProperty("encryptedData")
     public final String encryptedData;
 
     public EncryptedSubscription(
@@ -21,7 +23,7 @@ public class EncryptedSubscription {
     public EncryptedSubscription(
         @JsonProperty("hash")
             String hash,
-            @JsonProperty("encryptedData")
+        @JsonProperty("encryptedData")
             String encryptedData
     ) {
         this.hash = hash;

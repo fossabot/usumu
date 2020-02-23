@@ -61,6 +61,17 @@ public class MailServerSteps {
         );
     }
 
+    @Given("^I extracted the link to \"([^\"]+)\" from the last e-mail to \"([^\"]+)\" into the variable \"([^\"]+)\"(?:|,|\\.)$")
+    @When("^I extract the link to \"([^\"]+)\" from the last e-mail to \"([^\"]+)\" into the variable \"([^\"]+)\"(?:|,|\\.)$")
+    public void extractEmailVariable(String linkPatternString, String email, String variable) throws IOException, MessagingException {
+        Pattern linkPattern = Pattern.compile(linkPatternString);
+        assertTrue("No e-mail received to " + email, mailStorage.read(email).size() > 0);
+        final Message lastEmail = mailStorage.read(email)
+                .get(mailStorage.read(email)
+                        .size() - 1);
+        assertTrue("No link found", findLink(linkPattern, lastEmail.message, null, variable));
+    }
+
     private boolean findLink(Pattern linkPattern, Part message, @Nullable String captureGroup, @Nullable String captureName) throws MessagingException, IOException {
         if (message.getContentType().startsWith("text/html") || message.getContentType().startsWith("text/plain")) {
             //Handle e-mail body
@@ -81,8 +92,12 @@ public class MailServerSteps {
                 }
                 Matcher linkMatcher = linkPattern.matcher(match);
                 if (linkMatcher.matches()) {
-                    if (captureName != null && captureGroup != null && !captureName.isEmpty() && !captureGroup.isEmpty()) {
-                        variableStorage.store(captureName, linkMatcher.group(captureGroup));
+                    if (captureName != null && !captureName.isEmpty()) {
+                        if (captureGroup == null || captureGroup.isEmpty()) {
+                            variableStorage.store(captureName, linkMatcher.group(0));
+                        } else {
+                            variableStorage.store(captureName, linkMatcher.group(captureGroup));
+                        }
                     }
 
                     return true;
