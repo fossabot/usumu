@@ -16,6 +16,8 @@ import io.usumu.api.subscription.entity.SubscriptionStatus;
 import io.usumu.api.subscription.exception.SubscriptionAlreadyExists;
 import io.usumu.api.subscription.exception.SubscriptionNotFound;
 import io.usumu.api.subscription.resource.SubscriptionResource;
+import io.usumu.api.subscription.service.SubscriptionGetService;
+import io.usumu.api.subscription.service.SubscriptionUpdateService;
 import io.usumu.api.subscription.storage.SubscriptionStorageGet;
 import io.usumu.api.subscription.storage.SubscriptionStorageUpsert;
 import io.usumu.api.template.TemplateProvider;
@@ -37,35 +39,32 @@ import java.util.Map;
 )
 @RequestMapping("/subscriptions")
 public class SubscriptionCreateApi {
-    private final SubscriptionStorageGet subscriptionStorageGet;
-    private final SubscriptionStorageUpsert subscriptionStorageUpsert;
-    private final EntityCrypto entityCrypto;
     private final LinkProvider linkProvider;
     private final GlobalSecret globalSecret;
     private final SecretGenerator secretGenerator;
     private final HashGenerator hashGenerator;
     private final MailSender mailSender;
+    private final SubscriptionGetService subscriptionGetService;
+    private final SubscriptionUpdateService subscriptionUpdateService;
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
     public SubscriptionCreateApi(
-            SubscriptionStorageGet subscriptionStorageGet,
-            SubscriptionStorageUpsert subscriptionStorageUpsert,
-            EntityCrypto entityCrypto,
             LinkProvider linkProvider,
             GlobalSecret globalSecret,
             SecretGenerator secretGenerator,
             HashGenerator hashGenerator,
-            final MailSender mailSender
+            MailSender mailSender,
+            SubscriptionGetService subscriptionGetService,
+            SubscriptionUpdateService subscriptionUpdateService
     ) {
-        this.subscriptionStorageGet = subscriptionStorageGet;
-        this.subscriptionStorageUpsert = subscriptionStorageUpsert;
-        this.entityCrypto = entityCrypto;
         this.linkProvider = linkProvider;
         this.globalSecret = globalSecret;
         this.secretGenerator = secretGenerator;
         this.hashGenerator = hashGenerator;
         this.mailSender = mailSender;
+        this.subscriptionGetService = subscriptionGetService;
+        this.subscriptionUpdateService = subscriptionUpdateService;
     }
 
     @ApiOperation(
@@ -110,23 +109,18 @@ public class SubscriptionCreateApi {
         Subscription subscription;
         EncryptedSubscription encryptedSubscription;
         try {
-            encryptedSubscription = subscriptionStorageGet.get(request.value);
             //Conflict
-            subscription = entityCrypto.decrypt(encryptedSubscription.encryptedData, Subscription.class);
+            subscription = subscriptionGetService.get(request.value);
 
             if (
                     subscription.status != SubscriptionStatus.UNCONFIRMED &&
-                            subscription.status != SubscriptionStatus.UNSUBSCRIBED
+                    subscription.status != SubscriptionStatus.UNSUBSCRIBED
             ) {
                 //Already subscribed and confirmed
                 throw new SubscriptionAlreadyExists();
             } else if (subscription.status == SubscriptionStatus.UNSUBSCRIBED) {
                 //Resubscribe
                 subscription = subscription.withSubscribeInitiated(request.value, globalSecret);
-                encryptedSubscription = new EncryptedSubscription(
-                        subscription, entityCrypto
-                );
-                subscriptionStorageUpsert.store(encryptedSubscription);
             }
         } catch (SubscriptionNotFound subscriptionNotFound) {
 
@@ -148,13 +142,7 @@ public class SubscriptionCreateApi {
                         secretGenerator
                 );
             }
-
-            encryptedSubscription = new EncryptedSubscription(
-                    subscription,
-                    entityCrypto
-            );
-
-            subscriptionStorageUpsert.store(encryptedSubscription);
+            subscriptionUpdateService.update(subscription);
         }
 
         if (!request.imported && subscription.status == SubscriptionStatus.UNCONFIRMED) {

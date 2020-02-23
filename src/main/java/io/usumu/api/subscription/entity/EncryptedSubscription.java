@@ -14,7 +14,6 @@ public class EncryptedSubscription {
             Subscription subscription,
             EntityCrypto entityCrypto
     ) {
-
         hash = subscription.id;
         encryptedData = entityCrypto.encrypt(subscription);
     }

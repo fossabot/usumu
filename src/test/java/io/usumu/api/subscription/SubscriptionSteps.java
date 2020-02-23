@@ -143,7 +143,7 @@ public class SubscriptionSteps {
     @Then("^the subscription in the last response should have the status \"([^\"]+)\"(?:|,|\\.)$")
     public void statusCheck(String status) {
         final JsonNode json = responseStorage.lastResponse.getBody();
-        assert json.getObject().get("status").equals(variableStorage.resolve(status));
+        assertEquals("Unexpected subscription status. Wanted " + variableStorage.resolve(status) + ", found " + json.getObject().get("status"), json.getObject().get("status"), variableStorage.resolve(status));
     }
 
     @Given("^I confirmed the subscription \"(.*)\" with the code \"(.*)\"(?:|,|\\.)$")
@@ -175,6 +175,20 @@ public class SubscriptionSteps {
                 .header("Content-Type", "application/json")
                 .accept("application/json")
                 .asJson();
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Given("^I downloaded the logs for subscription \"(.*)\"(?:|,|\\.)$")
+    @When("^I download the logs for subscription \"(.*)\"(?:|,|\\.)$")
+    public void downloadLogs(String subscriptionId) {
+        try {
+            responseStorage.lastResponse = Unirest
+                    .get("http://localhost:8080/subscriptions/" + URLEncoder.encode(variableStorage.resolve(subscriptionId) + "/logs", "UTF-8"))
+                    .header("Content-Type", "application/json")
+                    .accept("application/json")
+                    .asJson();
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }

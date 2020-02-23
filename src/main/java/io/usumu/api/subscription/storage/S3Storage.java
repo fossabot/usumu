@@ -24,41 +24,24 @@ import java.util.stream.Collectors;
 @Service
 public class S3Storage implements SubscriptionStorageUpsert, SubscriptionStorageGet, SubscriptionStorageList {
     private final S3Accessor      s3Accessor;
-    private final S3Factory       s3Factory;
-    private final S3Configuration s3Configuration;
     private final ObjectMapper    objectMapper;
-    private final GlobalSecret    globalSecret;
-    private final HashGenerator   hashGenerator;
 
     @Autowired
     public S3Storage(
         final S3Accessor s3Accessor,
-        S3Factory s3Factory,
-        S3Configuration s3Configuration,
-        ObjectMapper objectMapper,
-        GlobalSecret globalSecret,
-        HashGenerator hashGenerator
+        ObjectMapper objectMapper
     ) {
         this.s3Accessor = s3Accessor;
-        this.s3Factory = s3Factory;
-        this.s3Configuration = s3Configuration;
         this.objectMapper = objectMapper;
-        this.globalSecret = globalSecret;
-        this.hashGenerator = hashGenerator;
     }
 
     @Override
     public EncryptedSubscription get(String hash) throws SubscriptionNotFound {
-        //todo this may leak value to S3 provider. Fix by employing type detection.
         S3Object object;
         try {
-            object = s3Accessor.get("s/" + hashGenerator.generateHash(hash));
+            object = s3Accessor.get("s/" + hash);
         } catch (S3Accessor.ObjectNotFoundException e) {
-            try {
-                object = s3Accessor.get("s/" + hash);
-            } catch (S3Accessor.ObjectNotFoundException e2) {
-                throw new SubscriptionNotFound();
-            }
+            throw new SubscriptionNotFound();
         }
         S3ObjectInputStream data = object.getObjectContent();
 
@@ -107,7 +90,7 @@ public class S3Storage implements SubscriptionStorageUpsert, SubscriptionStorage
         try {
             objectMapper.writeValue(outputStream, encryptedSubscription);
         } catch (IOException e) {
-            //todo handle properly?
+            //todo handle properly? Is this even an issue?
             throw new RuntimeException(e);
         }
 

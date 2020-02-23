@@ -4,30 +4,25 @@ import org.springframework.lang.Nullable;
 
 import java.time.LocalDateTime;
 
-public class SubscriptionLogEntry {
+public class LogEntry {
     public final String id;
     public final String subscriptionId;
     public final LocalDateTime time;
     public final EntryType entryType;
     public final String ipAddress;
-    @Nullable
-    public final String newsletterId;
 
-
-    public SubscriptionLogEntry(
+    public LogEntry(
         String id,
         String subscriptionId,
         LocalDateTime time,
         EntryType entryType,
-        String ipAddress,
-        @Nullable String newsletterId
+        String ipAddress
     ) {
         this.id = id;
         this.subscriptionId = subscriptionId;
         this.time = time;
         this.entryType = entryType;
         this.ipAddress = ipAddress;
-        this.newsletterId = newsletterId;
     }
 
     public enum EntryType {

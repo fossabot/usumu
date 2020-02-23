@@ -2,7 +2,7 @@ Feature: Logging
   Background:
     Given I uploaded a template "verification/body.html" with the content
     """
-    <a href="http://example.com/verification/{{ verificationCode }}">Verify</a>
+    <a href="http://example.com/subscriptions/{{ value }}?verificationCode={{ verificationCode }}">Verify</a>
     """
     And I uploaded a template "verification/subject.txt" with the content
     """
@@ -18,11 +18,13 @@ Feature: Logging
     """
     And I uploaded a template "verification/toEmail.txt" with the content
     """
-    {{ email }}
+    {{ value }}
     """
 
   Scenario: Creating a subscription should produce a log entry
-    When I create a subscriber with the method "EMAIL" and the value "test10@example.com"
+    When I create a subscriber with the method "EMAIL" and the value "test10@example.com",
     And the last call succeeds,
-    And I stored the last response field "id" in the variable "subscriptionId"
-    Then the subscription "${subscriptionId}" should have a log entry type "CREATED".
+    And I stored the last response field "id" in the variable "subscriptionId",
+    And I downloaded the logs for subscription "${subscriptionId}"
+    Then the last call should succeed,
+    And the last call should contain a log entry of type "CREATED".

@@ -9,6 +9,8 @@ import io.usumu.api.subscription.entity.SubscriptionStatus;
 import io.usumu.api.subscription.exception.SubscriptionAlreadyDeleted;
 import io.usumu.api.subscription.exception.SubscriptionNotFound;
 import io.usumu.api.subscription.resource.SubscriptionResource;
+import io.usumu.api.subscription.service.SubscriptionDeleteService;
+import io.usumu.api.subscription.service.SubscriptionGetService;
 import io.usumu.api.subscription.storage.SubscriptionStorageGet;
 import io.usumu.api.subscription.storage.SubscriptionStorageUpsert;
 import org.slf4j.Logger;
@@ -26,26 +28,20 @@ import zone.refactor.spring.hateoas.contract.LinkProvider;
 )
 @RequestMapping("/subscriptions")
 public class SubscriptionDeleteApi {
-    private final SubscriptionStorageGet subscriptionStorageGet;
-    private final SubscriptionStorageUpsert subscriptionStorageUpsert;
-    private final EntityCrypto entityCrypto;
+    private final SubscriptionGetService subscriptionGetService;
     private final LinkProvider linkProvider;
-    private final HashGenerator hashGenerator;
+    private final SubscriptionDeleteService subscriptionDeleteService;
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
     public SubscriptionDeleteApi(
-        SubscriptionStorageGet subscriptionStorageGet,
-        SubscriptionStorageUpsert subscriptionStorageUpsert,
-        EntityCrypto entityCrypto,
-        LinkProvider linkProvider,
-        HashGenerator hashGenerator
+            SubscriptionGetService subscriptionGetService,
+            SubscriptionDeleteService subscriptionDeleteService,
+            LinkProvider linkProvider
     ) {
-        this.subscriptionStorageGet = subscriptionStorageGet;
-        this.subscriptionStorageUpsert = subscriptionStorageUpsert;
-        this.entityCrypto = entityCrypto;
+        this.subscriptionGetService = subscriptionGetService;
+        this.subscriptionDeleteService = subscriptionDeleteService;
         this.linkProvider = linkProvider;
-        this.hashGenerator = hashGenerator;
     }
 
     @ApiOperation(
@@ -74,13 +70,8 @@ public class SubscriptionDeleteApi {
         @PathVariable
         String value
     ) throws SubscriptionNotFound, SubscriptionAlreadyDeleted {
-        EncryptedSubscription encryptedSubscription = subscriptionStorageGet.get(value);
-        Subscription subscription = entityCrypto.decrypt(encryptedSubscription.encryptedData, Subscription.class);
-        if (subscription.status.equals(SubscriptionStatus.UNSUBSCRIBED)) {
-            throw new SubscriptionAlreadyDeleted();
-        }
-        subscription = subscription.withUnsubscribed();
-        subscriptionStorageUpsert.store(new EncryptedSubscription(subscription, entityCrypto));
+        Subscription subscription = subscriptionGetService.get(value);
+        subscription = subscriptionDeleteService.delete(subscription);
 
         return new SubscriptionResource(
             subscription,

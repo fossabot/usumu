@@ -2,16 +2,16 @@ package io.usumu.api.subscription.controller;
 
 import io.swagger.annotations.*;
 import io.usumu.api.crypto.EntityCrypto;
-import io.usumu.api.crypto.GlobalSecret;
 import io.usumu.api.crypto.HashGenerator;
 import io.usumu.api.crypto.SecretGenerator;
+import io.usumu.api.subscription.service.SubscriptionGetService;
 import io.usumu.api.subscription.entity.EncryptedSubscription;
 import io.usumu.api.subscription.entity.Subscription;
 import io.usumu.api.subscription.exception.SubscriptionNotFound;
 import io.usumu.api.subscription.exception.VerificationFailed;
 import io.usumu.api.subscription.resource.SubscriptionResource;
+import io.usumu.api.subscription.service.SubscriptionUpdateService;
 import io.usumu.api.subscription.storage.SubscriptionStorageGet;
-import io.usumu.api.subscription.storage.SubscriptionStorageList;
 import io.usumu.api.subscription.storage.SubscriptionStorageUpsert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,29 +25,26 @@ import zone.refactor.spring.hateoas.contract.LinkProvider;
 )
 @RequestMapping("/subscriptions")
 public class SubscriptionVerifyApi {
-    private final SubscriptionStorageGet subscriptionStorageGet;
-    private final SubscriptionStorageUpsert subscriptionStorageUpsert;
-    private final EntityCrypto entityCrypto;
+    private final SubscriptionUpdateService subscriptionUpdateService;
     private final LinkProvider linkProvider;
     private final SecretGenerator secretGenerator;
     private final HashGenerator hashGenerator;
+    private final SubscriptionGetService subscriptionGetService;
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
     public SubscriptionVerifyApi(
-        SubscriptionStorageGet subscriptionStorageGet,
-        SubscriptionStorageUpsert subscriptionStorageUpsert,
-        EntityCrypto entityCrypto,
-        LinkProvider linkProvider,
-        SecretGenerator secretGenerator,
-        HashGenerator hashGenerator
+            SubscriptionUpdateService subscriptionUpdateService,
+            LinkProvider linkProvider,
+            SecretGenerator secretGenerator,
+            HashGenerator hashGenerator,
+            SubscriptionGetService subscriptionGetService
     ) {
-        this.subscriptionStorageGet = subscriptionStorageGet;
-        this.subscriptionStorageUpsert = subscriptionStorageUpsert;
-        this.entityCrypto = entityCrypto;
+        this.subscriptionUpdateService = subscriptionUpdateService;
         this.linkProvider = linkProvider;
         this.secretGenerator = secretGenerator;
         this.hashGenerator = hashGenerator;
+        this.subscriptionGetService = subscriptionGetService;
     }
 
     @ApiResponses({
@@ -77,14 +74,14 @@ public class SubscriptionVerifyApi {
         @RequestBody
         SubscriptionVerifyRequest request
     ) throws SubscriptionNotFound, VerificationFailed {
-        EncryptedSubscription encryptedSubscription = subscriptionStorageGet.get(value);
-        Subscription subscription = entityCrypto.decrypt(encryptedSubscription.encryptedData, Subscription.class);
+        Subscription subscription = subscriptionGetService.get(value);
+
         subscription = subscription.verify(
             hashGenerator,
             secretGenerator,
             request.verificationCode
         );
-        subscriptionStorageUpsert.store(new EncryptedSubscription(subscription, entityCrypto));
+        subscriptionUpdateService.update(subscription);
 
         return new SubscriptionResource(
             subscription,

@@ -2,11 +2,14 @@ package io.usumu.api.log.controller;
 
 import io.swagger.annotations.*;
 import io.usumu.api.log.resource.SubscriptionLogEntryResource;
+import io.usumu.api.subscription.storage.SubscriptionStorageGet;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import zone.refactor.spring.hateoas.annotation.ListingEndpoint;
+
+import java.util.ArrayList;
 
 @RestController
 @Api(
@@ -14,6 +17,7 @@ import zone.refactor.spring.hateoas.annotation.ListingEndpoint;
 )
 @RequestMapping("/subscriptions/{value}/logs")
 public class LogListApi {
+
     @ApiOperation(
             nickname = "listLogs",
             value = "List logs for subscriber",
@@ -42,7 +46,9 @@ public class LogListApi {
             @PathVariable
             String value
     ) {
-            return null;
+        return new SubscriptionLogEntryList(
+                null,
+                new ArrayList<>()
+        );
     }
-
 }

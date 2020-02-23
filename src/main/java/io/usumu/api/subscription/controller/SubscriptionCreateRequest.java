@@ -3,7 +3,6 @@ package io.usumu.api.subscription.controller;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.*;
-import io.usumu.api.log.entity.SubscriptionLogEntry;
 import io.usumu.api.subscription.entity.SubscriptionMethod;
 import io.usumu.api.subscription.entity.SubscriptionStatus;
 

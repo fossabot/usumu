@@ -44,6 +44,14 @@ Feature: Subscriber management
     And the last call should return a subscription,
     And the subscription in the last response should have the status "UNCONFIRMED".
 
+  Scenario: Fetching a created subscription by id should return a subscription object.
+    Given I created a subscriber with the method "EMAIL" and the value "test4@example.com"
+    And I stored the last response field "id" in the variable "subscriptionId",
+    When I fetch the subscription "${subscriptionId}",
+    Then the last call should succeed,
+    And the last call should return a subscription,
+    And the subscription in the last response should have the status "UNCONFIRMED".
+
   Scenario: Creating a subscription should send a verification e-mail.
     When I create a subscriber with the method "EMAIL" and the value "test5@example.com"
     Then I should receive an e-mail to "test5@example.com",

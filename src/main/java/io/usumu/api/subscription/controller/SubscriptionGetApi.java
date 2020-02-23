@@ -1,12 +1,9 @@
 package io.usumu.api.subscription.controller;
 
 import io.swagger.annotations.*;
-import io.usumu.api.crypto.EntityCrypto;
-import io.usumu.api.crypto.HashGenerator;
-import io.usumu.api.subscription.entity.Subscription;
+import io.usumu.api.subscription.service.SubscriptionGetService;
 import io.usumu.api.subscription.exception.SubscriptionNotFound;
 import io.usumu.api.subscription.resource.SubscriptionResource;
-import io.usumu.api.subscription.storage.SubscriptionStorageGet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,23 +20,17 @@ import zone.refactor.spring.hateoas.contract.LinkProvider;
 )
 @RequestMapping("/subscriptions")
 public class SubscriptionGetApi {
-    private final SubscriptionStorageGet subscriptionStorageGet;
-    private final EntityCrypto entityCrypto;
     private final LinkProvider linkProvider;
-    private final HashGenerator hashGenerator;
+    private final SubscriptionGetService subscriptionGetService;
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
     public SubscriptionGetApi(
-        SubscriptionStorageGet subscriptionStorageGet,
-        EntityCrypto entityCrypto,
-        LinkProvider linkProvider,
-        HashGenerator hashGenerator
+            LinkProvider linkProvider,
+            SubscriptionGetService subscriptionGetService
     ) {
-        this.subscriptionStorageGet = subscriptionStorageGet;
-        this.entityCrypto = entityCrypto;
         this.linkProvider = linkProvider;
-        this.hashGenerator = hashGenerator;
+        this.subscriptionGetService = subscriptionGetService;
     }
 
     @ApiOperation(
@@ -69,11 +60,6 @@ public class SubscriptionGetApi {
         @PathVariable
             String value
     ) throws SubscriptionNotFound {
-        Subscription subscription = entityCrypto.decrypt(
-            subscriptionStorageGet.get(value).encryptedData,
-            Subscription.class
-        );
-
-        return new SubscriptionResource(subscription, linkProvider);
+        return new SubscriptionResource(subscriptionGetService.get(value), linkProvider);
     }
 }
