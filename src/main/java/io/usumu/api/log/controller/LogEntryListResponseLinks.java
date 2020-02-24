@@ -1,4 +1,4 @@
-package io.usumu.api.subscription.controller;
+package io.usumu.api.log.controller;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -8,13 +8,13 @@ import zone.refactor.spring.hateoas.contract.PartialLink;
 import zone.refactor.spring.hateoas.entity.SelfUpLink;
 
 @SuppressWarnings("WeakerAccess")
-@ApiModel("SubscriptionListLinks")
-public class SubscriptionListResponseLinks extends SelfUpLink {
+@ApiModel("LogEntryListLinks")
+public class LogEntryListResponseLinks extends SelfUpLink {
     @Nullable
     @ApiModelProperty(value = "Link to the next page of results.")
     public final Link next;
 
-    public SubscriptionListResponseLinks(
+    public LogEntryListResponseLinks(
         PartialLink self,
         PartialLink up,
         @Nullable

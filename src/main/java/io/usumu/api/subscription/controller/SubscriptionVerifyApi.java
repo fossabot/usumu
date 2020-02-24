@@ -1,20 +1,18 @@
 package io.usumu.api.subscription.controller;
 
 import io.swagger.annotations.*;
-import io.usumu.api.crypto.EntityCrypto;
 import io.usumu.api.crypto.HashGenerator;
 import io.usumu.api.crypto.SecretGenerator;
-import io.usumu.api.subscription.service.SubscriptionGetService;
-import io.usumu.api.subscription.entity.EncryptedSubscription;
+import io.usumu.api.log.entity.LogEntry;
+import io.usumu.api.log.service.SubscriptionLogger;
 import io.usumu.api.subscription.entity.Subscription;
+import io.usumu.api.subscription.exception.SubscriptionAlreadyVerified;
+import io.usumu.api.subscription.exception.SubscriptionDeleted;
 import io.usumu.api.subscription.exception.SubscriptionNotFound;
 import io.usumu.api.subscription.exception.VerificationFailed;
 import io.usumu.api.subscription.resource.SubscriptionResource;
+import io.usumu.api.subscription.service.SubscriptionGetService;
 import io.usumu.api.subscription.service.SubscriptionUpdateService;
-import io.usumu.api.subscription.storage.SubscriptionStorageGet;
-import io.usumu.api.subscription.storage.SubscriptionStorageUpsert;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import zone.refactor.spring.hateoas.contract.LinkProvider;
@@ -30,21 +28,23 @@ public class SubscriptionVerifyApi {
     private final SecretGenerator secretGenerator;
     private final HashGenerator hashGenerator;
     private final SubscriptionGetService subscriptionGetService;
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final SubscriptionLogger subscriptionLogger;
 
     @Autowired
     public SubscriptionVerifyApi(
-            SubscriptionUpdateService subscriptionUpdateService,
-            LinkProvider linkProvider,
-            SecretGenerator secretGenerator,
-            HashGenerator hashGenerator,
-            SubscriptionGetService subscriptionGetService
+        final SubscriptionUpdateService subscriptionUpdateService,
+        final LinkProvider linkProvider,
+        final SecretGenerator secretGenerator,
+        final HashGenerator hashGenerator,
+        final SubscriptionGetService subscriptionGetService,
+        final SubscriptionLogger subscriptionLogger
     ) {
         this.subscriptionUpdateService = subscriptionUpdateService;
         this.linkProvider = linkProvider;
         this.secretGenerator = secretGenerator;
         this.hashGenerator = hashGenerator;
         this.subscriptionGetService = subscriptionGetService;
+        this.subscriptionLogger = subscriptionLogger;
     }
 
     @ApiResponses({
@@ -73,7 +73,7 @@ public class SubscriptionVerifyApi {
         String value,
         @RequestBody
         SubscriptionVerifyRequest request
-    ) throws SubscriptionNotFound, VerificationFailed {
+    ) throws SubscriptionNotFound, VerificationFailed, SubscriptionAlreadyVerified, SubscriptionDeleted {
         Subscription subscription = subscriptionGetService.get(value);
 
         subscription = subscription.verify(
@@ -82,6 +82,7 @@ public class SubscriptionVerifyApi {
             request.verificationCode
         );
         subscriptionUpdateService.update(subscription);
+        subscriptionLogger.log(subscription, LogEntry.EntryType.VERIFIED, request.remoteIp);
 
         return new SubscriptionResource(
             subscription,

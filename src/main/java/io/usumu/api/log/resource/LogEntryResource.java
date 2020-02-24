@@ -6,15 +6,15 @@ import zone.refactor.spring.hateoas.contract.LinkProvider;
 import zone.refactor.spring.hateoas.entity.LinkedEntity;
 import zone.refactor.spring.hateoas.entity.SelfUpLink;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 @ApiModel("SubscriptionLogEntry")
 public class LogEntryResource extends LinkedEntity<SelfUpLink> {
-    public final String id;
-    public final String subscriptionId;
-    public final LocalDateTime time;
+    public final String             id;
+    public final String             subscriptionId;
+    public final ZonedDateTime      time;
     public final LogEntry.EntryType entryType;
-    public final String ipAddress;
+    public final String             ipAddress;
 
     public LogEntryResource(
         LogEntry logEntry,

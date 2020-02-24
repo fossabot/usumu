@@ -37,23 +37,34 @@ public class SubscriptionCreateRequest {
         example = "CONFIRMED"
     )
     public final SubscriptionStatus importStatus;
+    @Nullable
+    @ApiModelProperty(
+        value = "Remote IP address for logging purposes",
+        required = false
+    )
+    @JsonProperty(value = "remote_ip", required = false)
+    public final String remoteIp;
 
     @JsonCreator
     public SubscriptionCreateRequest(
-        @JsonProperty("method")
+        @JsonProperty(value = "method", required = true)
             SubscriptionMethod method,
-        @JsonProperty("value")
+        @JsonProperty(value = "value", required = true)
             String value,
         @Nullable
         @JsonProperty("import")
             Boolean imported,
         @Nullable
         @JsonProperty("import_status")
-            SubscriptionStatus importStatus
+            SubscriptionStatus importStatus,
+        @Nullable
+        @JsonProperty(value = "remote_ip", required = false)
+        String remoteIp
     ) {
         this.method = method;
         this.value = value;
         this.imported = imported == null?false:imported;
         this.importStatus = importStatus;
+        this.remoteIp = remoteIp;
     }
 }

@@ -1,54 +1,47 @@
 package io.usumu.api.subscription.controller;
 
 import io.swagger.annotations.*;
-import io.usumu.api.crypto.EntityCrypto;
-import io.usumu.api.crypto.HashGenerator;
-import io.usumu.api.subscription.entity.EncryptedSubscription;
+import io.usumu.api.log.entity.LogEntry;
+import io.usumu.api.log.service.SubscriptionLogger;
 import io.usumu.api.subscription.entity.Subscription;
-import io.usumu.api.subscription.entity.SubscriptionStatus;
 import io.usumu.api.subscription.exception.SubscriptionAlreadyDeleted;
 import io.usumu.api.subscription.exception.SubscriptionNotFound;
 import io.usumu.api.subscription.resource.SubscriptionResource;
 import io.usumu.api.subscription.service.SubscriptionDeleteService;
 import io.usumu.api.subscription.service.SubscriptionGetService;
-import io.usumu.api.subscription.storage.SubscriptionStorageGet;
-import io.usumu.api.subscription.storage.SubscriptionStorageUpsert;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import zone.refactor.spring.hateoas.contract.LinkProvider;
 
 @RestController
 @Api(
-        tags = "Subscriptions"
+    tags = "Subscriptions"
 )
 @RequestMapping("/subscriptions")
 public class SubscriptionDeleteApi {
-    private final SubscriptionGetService subscriptionGetService;
-    private final LinkProvider linkProvider;
+    private final SubscriptionGetService    subscriptionGetService;
+    private final LinkProvider              linkProvider;
     private final SubscriptionDeleteService subscriptionDeleteService;
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final SubscriptionLogger        subscriptionLogger;
 
     @Autowired
     public SubscriptionDeleteApi(
-            SubscriptionGetService subscriptionGetService,
-            SubscriptionDeleteService subscriptionDeleteService,
-            LinkProvider linkProvider
+        SubscriptionGetService subscriptionGetService,
+        SubscriptionDeleteService subscriptionDeleteService,
+        LinkProvider linkProvider,
+        final SubscriptionLogger subscriptionLogger
     ) {
         this.subscriptionGetService = subscriptionGetService;
         this.subscriptionDeleteService = subscriptionDeleteService;
         this.linkProvider = linkProvider;
+        this.subscriptionLogger = subscriptionLogger;
     }
 
     @ApiOperation(
         nickname = "deleteSubscription",
         value = "Delete a subscription",
         notes = "Delete a subscription by providing the subscription entryType (EMAIL or SMS)." +
-            "The value in this case is either the phone number in international format, or the e-mail address.",
+                "The value in this case is either the phone number in international format, or the e-mail address.",
         consumes = "application/json",
         produces = "application/json"
     )
@@ -68,15 +61,17 @@ public class SubscriptionDeleteApi {
             required = true
         )
         @PathVariable
-        String value
+            String value,
+        @RequestBody
+            SubscriptionDeleteRequest request
     ) throws SubscriptionNotFound, SubscriptionAlreadyDeleted {
         Subscription subscription = subscriptionGetService.get(value);
         subscription = subscriptionDeleteService.delete(subscription);
+        subscriptionLogger.log(subscription, LogEntry.EntryType.DELETED, request.remoteIp);
 
         return new SubscriptionResource(
             subscription,
             linkProvider
         );
     }
-
 }

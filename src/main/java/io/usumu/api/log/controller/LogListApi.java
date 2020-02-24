@@ -2,6 +2,7 @@ package io.usumu.api.log.controller;
 
 import io.swagger.annotations.*;
 import io.usumu.api.common.entity.PaginatedList;
+import io.usumu.api.crypto.HashGenerator;
 import io.usumu.api.log.entity.LogEntry;
 import io.usumu.api.log.resource.LogEntryResource;
 import io.usumu.api.log.service.LogEntryListService;
@@ -9,10 +10,7 @@ import io.usumu.api.subscription.entity.Subscription;
 import io.usumu.api.subscription.exception.SubscriptionNotFound;
 import io.usumu.api.subscription.service.SubscriptionGetService;
 import org.springframework.lang.Nullable;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import zone.refactor.spring.hateoas.annotation.ListingEndpoint;
 import zone.refactor.spring.hateoas.contract.LinkProvider;
 
@@ -25,15 +23,18 @@ public class LogListApi {
     private final SubscriptionGetService subscriptionGetService;
     private final LogEntryListService logEntryListService;
     private final LinkProvider linkProvider;
+    private final HashGenerator hashGenerator;
 
     public LogListApi(
-        SubscriptionGetService subscriptionGetService,
-        LogEntryListService logEntryListService,
-        LinkProvider linkProvider
+        final SubscriptionGetService subscriptionGetService,
+        final LogEntryListService logEntryListService,
+        final LinkProvider linkProvider,
+        final HashGenerator hashGenerator
     ) {
         this.subscriptionGetService = subscriptionGetService;
         this.logEntryListService = logEntryListService;
         this.linkProvider = linkProvider;
+        this.hashGenerator = hashGenerator;
     }
 
     @ApiOperation(
@@ -48,7 +49,7 @@ public class LogListApi {
                     @ApiResponse(
                         code = 200,
                         message = "A list of all transactions related to a subscription.",
-                        response = LogEntryList.class
+                        response = LogEntryListResponse.class
                     ),
             }
     )
@@ -56,36 +57,41 @@ public class LogListApi {
             method = RequestMethod.GET
     )
     @ListingEndpoint(LogEntryResource.class)
-    public LogEntryList list(
+    public LogEntryListResponse list(
         @ApiParam(
                     value = "Subscription ID, or subscriber contact info (EMAIL or PHONE in international format)",
                     required = true
             )
-            @PathVariable(value = "value")
+            @PathVariable
             String value,
             @SuppressWarnings("DefaultAnnotationParam")
             @Nullable
             @ApiParam(
                 value = "Number of items to return",
                 required = false,
-                allowableValues = "range(0,100)"
+                allowableValues = "range(0,100)",
+                defaultValue = "100"
             )
+            @RequestParam(required = false)
             Integer itemCount,
             @SuppressWarnings("DefaultAnnotationParam")
             @Nullable
             @ApiParam(
                 value = "Continuation token for next page of results.",
                 required = false,
-                allowEmptyValue = true
+                allowEmptyValue = true,
+                defaultValue = ""
             )
+            @RequestParam(required = false)
             String continuationToken
     ) throws SubscriptionNotFound {
         Subscription subscription = subscriptionGetService.get(value);
         PaginatedList<LogEntry> result = logEntryListService.list(subscription, itemCount, continuationToken);
 
-        return new LogEntryList(
-            result.continuationToken,
+        return new LogEntryListResponse(
             result.items,
+            result.continuationToken,
+            hashGenerator,
             linkProvider
         );
     }

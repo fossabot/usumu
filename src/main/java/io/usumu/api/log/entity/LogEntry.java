@@ -1,21 +1,22 @@
 package io.usumu.api.log.entity;
 
-import org.springframework.lang.Nullable;
-
-import java.time.LocalDateTime;
+import javax.annotation.Nullable;
+import java.time.ZonedDateTime;
 
 public class LogEntry {
     public final String id;
     public final String subscriptionId;
-    public final LocalDateTime time;
+    public final ZonedDateTime time;
     public final EntryType entryType;
+    @Nullable
     public final String ipAddress;
 
     public LogEntry(
         String id,
         String subscriptionId,
-        LocalDateTime time,
+        ZonedDateTime time,
         EntryType entryType,
+        @Nullable
         String ipAddress
     ) {
         this.id = id;
@@ -26,12 +27,14 @@ public class LogEntry {
     }
 
     public enum EntryType {
-        IMPORTED_CREATED,
+        IMPORTED_UNCONFIRMED,
         CREATED,
-        IMPORTED_VERIFIED,
+        RESENT_VERIFICATION,
+        IMPORTED_CONFIRMED,
         VERIFIED,
         NEWSLETTER,
-        IMPORTED_DELETED,
-        DELETED
+        IMPORTED_UNSUBSCRIBED,
+        DELETED,
+        RESUBSCRIBED;
     }
 }

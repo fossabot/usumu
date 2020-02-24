@@ -7,6 +7,8 @@ import io.usumu.api.common.validation.*;
 import io.usumu.api.crypto.GlobalSecret;
 import io.usumu.api.crypto.HashGenerator;
 import io.usumu.api.crypto.SecretGenerator;
+import io.usumu.api.subscription.exception.SubscriptionAlreadyVerified;
+import io.usumu.api.subscription.exception.SubscriptionDeleted;
 import io.usumu.api.subscription.exception.VerificationFailed;
 import org.springframework.lang.Nullable;
 
@@ -170,7 +172,13 @@ public class Subscription {
         return hashGenerator.generateHash("confirmation", secret).substring(0,8);
     }
 
-    public Subscription verify(HashGenerator hashGenerator, SecretGenerator secretGenerator, String verificationCode) throws VerificationFailed {
+    public Subscription verify(HashGenerator hashGenerator, SecretGenerator secretGenerator, String verificationCode)
+        throws VerificationFailed, SubscriptionAlreadyVerified, SubscriptionDeleted {
+        if (this.status == SubscriptionStatus.CONFIRMED) {
+            throw new SubscriptionAlreadyVerified();
+        } else if (this.status == SubscriptionStatus.UNSUBSCRIBED) {
+            throw new SubscriptionDeleted();
+        }
         if (verificationCode.equals(getVerificationCode(hashGenerator))) {
             //Rotate the secret
             return new Subscription(

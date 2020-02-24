@@ -5,6 +5,7 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import io.usumu.api.LastResponseStorage;
 import io.usumu.api.subscription.controller.SubscriptionCreateRequest;
+import io.usumu.api.subscription.controller.SubscriptionDeleteRequest;
 import io.usumu.api.subscription.controller.SubscriptionVerifyRequest;
 import io.usumu.api.subscription.entity.SubscriptionMethod;
 import io.usumu.api.subscription.entity.SubscriptionStatus;
@@ -66,6 +67,7 @@ public class SubscriptionSteps {
             SubscriptionMethod.fromString(type),
             value,
             false,
+            null,
             null
         );
 
@@ -89,7 +91,8 @@ public class SubscriptionSteps {
             SubscriptionMethod.fromString(type),
             value,
             true,
-            SubscriptionStatus.fromString(status)
+            SubscriptionStatus.fromString(status),
+            null
         );
 
         responseStorage.lastResponse = Unirest
@@ -150,7 +153,8 @@ public class SubscriptionSteps {
     @When("^I confirm the subscription \"(.*)\" with the code \"(.*)\"(?:|,|\\.)$")
     public void confirm(String value, String code) {
         final SubscriptionVerifyRequest verifyRequest = new SubscriptionVerifyRequest(
-            variableStorage.resolve(code)
+            variableStorage.resolve(code),
+            null
         );
         try {
             responseStorage.lastResponse = Unirest
@@ -174,6 +178,7 @@ public class SubscriptionSteps {
                 .delete("http://localhost:8080/subscriptions/" + URLEncoder.encode(variableStorage.resolve(value), "UTF-8"))
                 .header("Content-Type", "application/json")
                 .accept("application/json")
+                .body(new SubscriptionDeleteRequest(null))
                 .asJson();
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
