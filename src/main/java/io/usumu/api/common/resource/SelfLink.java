@@ -1,5 +1,6 @@
 package io.usumu.api.common.resource;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -12,6 +13,14 @@ public class SelfLink extends Resource implements zone.refactor.spring.hateoas.c
 
     public SelfLink(zone.refactor.spring.hateoas.contract.PartialLink self) {
         this.self = self.withSelfRel();
+    }
+
+    @JsonCreator
+    public SelfLink(
+        @JsonProperty(value = "self", required = true)
+        Link self
+    ) {
+        this.self = self;
     }
 
     @Override

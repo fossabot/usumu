@@ -190,8 +190,7 @@ public class SubscriptionSteps {
     public void downloadLogs(String subscriptionId) {
         try {
             responseStorage.lastResponse = Unirest
-                    .get("http://localhost:8080/subscriptions/" + URLEncoder.encode(variableStorage.resolve(subscriptionId) + "/logs", "UTF-8"))
-                    .header("Content-Type", "application/json")
+                    .get("http://localhost:8080/subscriptions/" + URLEncoder.encode(variableStorage.resolve(subscriptionId), "UTF-8") + "/logs")
                     .accept("application/json")
                     .asJson();
         } catch (UnsupportedEncodingException e) {

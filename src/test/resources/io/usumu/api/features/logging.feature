@@ -25,6 +25,5 @@ Feature: Logging
     When I create a subscriber with the method "EMAIL" and the value "test10@example.com",
     And the last call succeeds,
     And I stored the last response field "id" in the variable "subscriptionId",
-    And I downloaded the logs for subscription "${subscriptionId}"
-    Then the last call should succeed,
-    And the last call should contain a log entry of type "CREATED".
+    Then the logs for subscription "${subscriptionId}" should contain a log event of the type "CREATED".
+

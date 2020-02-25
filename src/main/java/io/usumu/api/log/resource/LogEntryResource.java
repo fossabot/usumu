@@ -1,10 +1,13 @@
 package io.usumu.api.log.resource;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModel;
+import io.usumu.api.common.resource.SelfUpLink;
 import io.usumu.api.log.entity.LogEntry;
+import org.springframework.lang.Nullable;
 import zone.refactor.spring.hateoas.contract.LinkProvider;
 import zone.refactor.spring.hateoas.entity.LinkedEntity;
-import zone.refactor.spring.hateoas.entity.SelfUpLink;
 
 import java.time.ZonedDateTime;
 
@@ -14,6 +17,7 @@ public class LogEntryResource extends LinkedEntity<SelfUpLink> {
     public final String             subscriptionId;
     public final ZonedDateTime      time;
     public final LogEntry.EntryType entryType;
+    @Nullable
     public final String             ipAddress;
 
     public LogEntryResource(
@@ -29,5 +33,29 @@ public class LogEntryResource extends LinkedEntity<SelfUpLink> {
         time = logEntry.time;
         entryType = logEntry.entryType;
         ipAddress = logEntry.ipAddress;
+    }
+
+    @JsonCreator
+    public LogEntryResource(
+        @JsonProperty(value = "id", required = true)
+        final String id,
+        @JsonProperty(value = "subscriptionId", required = true)
+        final String subscriptionId,
+        @JsonProperty(value = "time", required = true)
+        final ZonedDateTime time,
+        @JsonProperty(value = "entryType", required = true)
+        final LogEntry.EntryType entryType,
+        @Nullable
+        @JsonProperty(value = "ipAddress", required = false)
+        final String ipAddress,
+        @JsonProperty(value = "_links", required = true)
+        final SelfUpLink links
+    ) {
+        super(links);
+        this.id = id;
+        this.subscriptionId = subscriptionId;
+        this.time = time;
+        this.entryType = entryType;
+        this.ipAddress = ipAddress;
     }
 }

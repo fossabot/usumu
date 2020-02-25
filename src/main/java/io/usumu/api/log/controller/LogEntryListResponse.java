@@ -1,5 +1,7 @@
 package io.usumu.api.log.controller;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -66,5 +68,22 @@ public class LogEntryListResponse extends LinkedEntity<LogEntryListResponseLinks
             logEntry, linkProvider
         )).collect(Collectors.toList());
         this.continuationToken = continuationToken == null || continuationToken.isEmpty()?null:continuationToken;
+    }
+
+    @JsonCreator
+    @JsonIgnoreProperties({
+        "@type"
+    })
+    public LogEntryListResponse(
+        @JsonProperty(value = "logEntries", required = true)
+        List<LogEntryResource> logEntries,
+        @JsonProperty("continuationToken")
+        @Nullable String continuationToken,
+        @JsonProperty(value = "_links", required = true)
+        LogEntryListResponseLinks links
+    ) {
+        super(links);
+        this.logEntries = logEntries;
+        this.continuationToken = continuationToken;
     }
 }
