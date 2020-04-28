@@ -1,4 +1,6 @@
 # Usumu, an API-first, cloud-native subscription and newsletter microservice
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fusumu%2Fusumu.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fusumu%2Fusumu?ref=badge_shield)
+
 
 Usumu is a handy little tool store and manage your newsletter subscriptions and send out newsletters using an API.
 It stores data encrypted on an S3-compatible object storage bucket.
@@ -46,3 +48,7 @@ By default, Usumu will listen on port 8080.
 
 In order to use Usumu, go to http://your-usumu-host:8080 to access the API. The API documentation will be accessible
 at `/swagger-ui.html`.
+
+
+## License
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fusumu%2Fusumu.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fusumu%2Fusumu?ref=badge_large)
